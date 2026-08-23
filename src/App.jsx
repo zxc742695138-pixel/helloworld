@@ -5,6 +5,7 @@ import HomeView from './components/HomeView'
 import SearchView from './components/SearchView'
 import ActivityView from './components/ActivityView'
 import ProfileView from './components/ProfileView'
+import PostDetail from './components/PostDetail'
 import ComposeModal from './components/ComposeModal'
 import Toast from './components/Toast'
 import { initialPosts, initialFollowing, initialNotifications, currentUser } from './data'
@@ -25,7 +26,8 @@ function App() {
   const [notifications, setNotifications] = useState(initialNotifications)
   const [tab, setTab] = useState('home')
   const [theme, setTheme] = useState(getInitialTheme)
-  const [compose, setCompose] = useState(null) // { mode: 'post' | 'reply', target? }
+  const [composeOpen, setComposeOpen] = useState(false)
+  const [openPostId, setOpenPostId] = useState(null)
   const [toast, setToast] = useState('')
 
   useEffect(() => {
@@ -70,50 +72,57 @@ function App() {
     setToast('Đã đánh dấu đã đọc tất cả')
   }
 
-  function openComposePost() {
-    setCompose({ mode: 'post' })
-  }
-
-  function openComposeReply(post) {
-    setCompose({ mode: 'reply', target: post })
-  }
-
-  function closeCompose() {
-    setCompose(null)
-  }
-
   function submitCompose(text) {
-    if (compose?.mode === 'reply' && compose.target) {
-      const targetId = compose.target.id
-      setPosts((prev) =>
-        prev.map((p) => (p.id === targetId ? { ...p, replies: p.replies + 1 } : p)),
-      )
-      setToast('Đã gửi phản hồi')
-    } else {
-      const newPost = {
-        id: nextPostId++,
-        name: currentUser.name,
-        handle: currentUser.handle,
-        initials: currentUser.initials,
-        color: currentUser.color,
-        verified: false,
-        time: 'Vừa xong',
-        text,
-        likes: 0,
-        replies: 0,
-        reposts: 0,
-        liked: false,
-        reposted: false,
-        mine: true,
-      }
-      setPosts((prev) => [newPost, ...prev])
-      setToast('Đã đăng bài!')
-      setTab('home')
+    const newPost = {
+      id: nextPostId++,
+      name: currentUser.name,
+      handle: currentUser.handle,
+      initials: currentUser.initials,
+      color: currentUser.color,
+      verified: false,
+      time: 'Vừa xong',
+      text,
+      likes: 0,
+      replies: 0,
+      reposts: 0,
+      liked: false,
+      reposted: false,
+      mine: true,
+      repliesList: [],
     }
-    setCompose(null)
+    setPosts((prev) => [newPost, ...prev])
+    setToast('Đã đăng bài!')
+    setTab('home')
+    setComposeOpen(false)
+  }
+
+  function addReply(postId, text) {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? {
+              ...p,
+              replies: p.replies + 1,
+              repliesList: [
+                ...(p.repliesList || []),
+                {
+                  name: currentUser.name,
+                  handle: currentUser.handle,
+                  initials: currentUser.initials,
+                  color: currentUser.color,
+                  text,
+                  time: 'Vừa xong',
+                },
+              ],
+            }
+          : p,
+      ),
+    )
+    setToast('Đã gửi phản hồi')
   }
 
   const hasUnread = notifications.some((n) => !n.read)
+  const openPost = openPostId ? posts.find((p) => p.id === openPostId) : null
 
   const sharedFeedProps = {
     posts,
@@ -121,41 +130,56 @@ function App() {
     onToggleLike: toggleLike,
     onToggleRepost: toggleRepost,
     onToggleFollow: toggleFollow,
-    onReply: openComposeReply,
+    onOpenPost: (post) => setOpenPostId(post.id),
   }
 
   return (
     <div className="app-shell">
-      <Header theme={theme} onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))} />
-
-      <main className="feed">
-        {tab === 'home' && <HomeView {...sharedFeedProps} onOpenCompose={openComposePost} />}
-        {tab === 'search' && <SearchView {...sharedFeedProps} />}
-        {tab === 'activity' && (
-          <ActivityView
-            notifications={notifications}
-            onMarkRead={markNotifRead}
-            onMarkAllRead={markAllRead}
-          />
-        )}
-        {tab === 'profile' && <ProfileView {...sharedFeedProps} onOpenCompose={openComposePost} />}
-      </main>
-
-      <BottomNav
-        active={tab}
-        hasUnread={hasUnread}
-        onNavigate={setTab}
-        onOpenCompose={openComposePost}
+      <Header
+        theme={theme}
+        onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+        mode={openPost ? 'detail' : 'feed'}
+        onBack={() => setOpenPostId(null)}
       />
 
-      {compose && (
-        <ComposeModal
-          mode={compose.mode}
-          target={compose.target}
-          onClose={closeCompose}
-          onSubmit={submitCompose}
+      <main className="feed">
+        {openPost ? (
+          <PostDetail
+            post={openPost}
+            following={following}
+            onToggleLike={toggleLike}
+            onToggleRepost={toggleRepost}
+            onToggleFollow={toggleFollow}
+            onAddReply={addReply}
+          />
+        ) : (
+          <>
+            {tab === 'home' && <HomeView {...sharedFeedProps} onOpenCompose={() => setComposeOpen(true)} />}
+            {tab === 'search' && <SearchView {...sharedFeedProps} />}
+            {tab === 'activity' && (
+              <ActivityView
+                notifications={notifications}
+                onMarkRead={markNotifRead}
+                onMarkAllRead={markAllRead}
+              />
+            )}
+            {tab === 'profile' && (
+              <ProfileView {...sharedFeedProps} onOpenCompose={() => setComposeOpen(true)} />
+            )}
+          </>
+        )}
+      </main>
+
+      {!openPost && (
+        <BottomNav
+          active={tab}
+          hasUnread={hasUnread}
+          onNavigate={setTab}
+          onOpenCompose={() => setComposeOpen(true)}
         />
       )}
+
+      {composeOpen && <ComposeModal onClose={() => setComposeOpen(false)} onSubmit={submitCompose} />}
 
       <Toast message={toast} />
     </div>

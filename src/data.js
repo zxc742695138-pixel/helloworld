@@ -24,6 +24,24 @@ export const initialPosts = [
     liked: false,
     reposted: false,
     mine: false,
+    repliesList: [
+      {
+        name: 'Duy Khang',
+        handle: 'khang.dev',
+        initials: 'DK',
+        color: '#0ea5e9',
+        text: 'Chúc mừng! Bạn dùng nền tảng nào để build vậy?',
+        time: '1h',
+      },
+      {
+        name: 'Thu Trang',
+        handle: 'trangthu',
+        initials: 'TT',
+        color: '#ec4899',
+        text: 'Nghe hấp dẫn ghê, mình cũng đang định thử.',
+        time: '40 phút',
+      },
+    ],
   },
   {
     id: 2,
@@ -40,6 +58,16 @@ export const initialPosts = [
     liked: true,
     reposted: false,
     mine: false,
+    repliesList: [
+      {
+        name: 'Hoàng Long',
+        handle: 'long.builds',
+        initials: 'HL',
+        color: '#22c55e',
+        text: 'Đồng ý, static site nhẹ và dễ maintain hơn nhiều.',
+        time: '2h',
+      },
+    ],
   },
   {
     id: 3,
@@ -56,6 +84,16 @@ export const initialPosts = [
     liked: false,
     reposted: false,
     mine: false,
+    repliesList: [
+      {
+        name: 'Bảo Ngọc',
+        handle: 'ngoc.ui',
+        initials: 'BN',
+        color: '#a855f7',
+        text: 'Mình mới biết điều này luôn, cảm ơn bạn!',
+        time: '3h',
+      },
+    ],
   },
   {
     id: 4,
@@ -72,6 +110,16 @@ export const initialPosts = [
     liked: false,
     reposted: false,
     mine: false,
+    repliesList: [
+      {
+        name: 'Mai Anh',
+        handle: 'maianh.codes',
+        initials: 'MA',
+        color: '#f97316',
+        text: 'Ha, lần đầu gặp cũng hoảng thật 😅',
+        time: '5h',
+      },
+    ],
   },
   {
     id: 5,
@@ -88,6 +136,16 @@ export const initialPosts = [
     liked: false,
     reposted: true,
     mine: false,
+    repliesList: [
+      {
+        name: 'Duy Khang',
+        handle: 'khang.dev',
+        initials: 'DK',
+        color: '#0ea5e9',
+        text: 'Chuẩn luôn, spacing với typography quan trọng hơn màu mè.',
+        time: '6h',
+      },
+    ],
   },
 ]
 

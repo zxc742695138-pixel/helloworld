@@ -120,6 +120,14 @@ export function UserPlusIcon(props) {
   )
 }
 
+export function BackIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="m11 5-7 7 7 7M4.5 12h15" />
+    </svg>
+  )
+}
+
 export function CloseIcon(props) {
   return (
     <svg {...base} {...props}>

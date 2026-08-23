@@ -8,7 +8,7 @@ function normalize(s) {
   return s.toLowerCase()
 }
 
-export default function SearchView({ posts, following, onToggleLike, onToggleRepost, onToggleFollow, onReply }) {
+export default function SearchView({ posts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost }) {
   const [query, setQuery] = useState('')
   const q = normalize(query.trim())
 
@@ -117,7 +117,7 @@ export default function SearchView({ posts, following, onToggleLike, onToggleRep
               onToggleLike={onToggleLike}
               onToggleRepost={onToggleRepost}
               onToggleFollow={onToggleFollow}
-              onReply={onReply}
+              onOpenPost={onOpenPost}
             />
           ))}
         </>

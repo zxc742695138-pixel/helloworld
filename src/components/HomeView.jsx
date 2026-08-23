@@ -2,7 +2,7 @@ import Avatar from './Avatar'
 import PostCard from './PostCard'
 import { currentUser } from '../data'
 
-export default function HomeView({ posts, following, onToggleLike, onToggleRepost, onToggleFollow, onReply, onOpenCompose }) {
+export default function HomeView({ posts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost, onOpenCompose }) {
   return (
     <div className="view">
       <button className="composer" type="button" onClick={onOpenCompose}>
@@ -20,7 +20,7 @@ export default function HomeView({ posts, following, onToggleLike, onToggleRepos
           onToggleLike={onToggleLike}
           onToggleRepost={onToggleRepost}
           onToggleFollow={onToggleFollow}
-          onReply={onReply}
+          onOpenPost={onOpenPost}
         />
       ))}
 

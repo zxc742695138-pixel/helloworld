@@ -2,7 +2,7 @@ import Avatar from './Avatar'
 import PostCard from './PostCard'
 import { currentUser } from '../data'
 
-export default function ProfileView({ posts, following, onToggleLike, onToggleRepost, onToggleFollow, onReply, onOpenCompose }) {
+export default function ProfileView({ posts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost, onOpenCompose }) {
   const myPosts = posts.filter((p) => p.mine)
 
   return (
@@ -48,7 +48,7 @@ export default function ProfileView({ posts, following, onToggleLike, onToggleRe
             onToggleLike={onToggleLike}
             onToggleRepost={onToggleRepost}
             onToggleFollow={onToggleFollow}
-            onReply={onReply}
+            onOpenPost={onOpenPost}
           />
         ))
       )}
