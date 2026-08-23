@@ -22,6 +22,7 @@ export default function PostCard({
   onToggleFollow,
   onOpenPost,
   onCommentClick,
+  featured = false,
 }) {
   const {
     name,
@@ -78,21 +79,23 @@ export default function PostCard({
 
         <div className="post-actions">
           <button
-            className={`icon-btn action${liked ? ' liked' : ''}`}
+            className={`icon-btn action${liked ? ' liked' : ''}${featured ? ' with-count' : ''}`}
             type="button"
             aria-pressed={liked}
             aria-label="Thích"
             onClick={stop(() => onToggleLike(post.id))}
           >
             <HeartIcon filled={liked} />
+            {featured && <span className="action-count">{formatCount(likes + (liked ? 1 : 0))}</span>}
           </button>
           <button
-            className="icon-btn action"
+            className={`icon-btn action${featured ? ' with-count' : ''}`}
             type="button"
             aria-label="Trả lời"
             onClick={stop(() => (onCommentClick ? onCommentClick(post) : onOpenPost(post)))}
           >
             <CommentIcon />
+            {featured && <span className="action-count">{formatCount(replies)}</span>}
           </button>
           <button
             className={`icon-btn action${reposted ? ' reposted' : ''}`}
@@ -108,18 +111,20 @@ export default function PostCard({
           </button>
         </div>
 
-        <div className="post-meta">
-          {replierAvatars?.length > 0 && (
-            <span className="replier-stack">
-              {replierAvatars.map((a, i) => (
-                <Avatar key={i} initials={a.initials} color={a.color} size={16} />
-              ))}
+        {!featured && (
+          <div className="post-meta">
+            {replierAvatars?.length > 0 && (
+              <span className="replier-stack">
+                {replierAvatars.map((a, i) => (
+                  <Avatar key={i} initials={a.initials} color={a.color} size={16} />
+                ))}
+              </span>
+            )}
+            <span>
+              {formatCount(replies)} phản hồi · {formatCount(likes + (liked ? 1 : 0))} lượt thích
             </span>
-          )}
-          <span>
-            {formatCount(replies)} phản hồi · {formatCount(likes + (liked ? 1 : 0))} lượt thích
-          </span>
-        </div>
+          </div>
+        )}
       </div>
     </article>
   )

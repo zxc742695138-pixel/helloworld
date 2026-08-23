@@ -54,6 +54,7 @@ export default function PostDetail({
         onToggleRepost={onToggleRepost}
         onToggleFollow={onToggleFollow}
         onCommentClick={() => setReplyTarget(post)}
+        featured
       />
 
       <p className="section-label">Phản hồi</p>

@@ -267,6 +267,19 @@
   color: var(--text-tertiary);
 }
 
+.icon-btn.with-count {
+  width: auto;
+  padding: 0 10px 0 8px;
+  border-radius: 999px;
+  gap: 5px;
+}
+
+.action-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
 .action.liked {
   color: var(--like);
 }
