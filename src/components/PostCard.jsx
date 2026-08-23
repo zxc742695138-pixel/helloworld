@@ -13,7 +13,15 @@ function formatCount(n) {
   return String(n)
 }
 
-export default function PostCard({ post, onToggleLike, onToggleRepost }) {
+export default function PostCard({
+  post,
+  isFollowing,
+  isOwn,
+  onToggleLike,
+  onToggleRepost,
+  onToggleFollow,
+  onReply,
+}) {
   const {
     name,
     handle,
@@ -27,7 +35,6 @@ export default function PostCard({ post, onToggleLike, onToggleRepost }) {
     reposts,
     liked,
     reposted,
-    canFollow,
   } = post
 
   return (
@@ -44,8 +51,12 @@ export default function PostCard({ post, onToggleLike, onToggleRepost }) {
             <span className="post-time">{time}</span>
           </div>
           <div className="post-head-right">
-            {canFollow && <button className="follow-btn" type="button">Follow</button>}
-            <button className="icon-btn ghost" type="button" aria-label="More">
+            {!isOwn && !isFollowing && (
+              <button className="follow-btn" type="button" onClick={() => onToggleFollow(handle)}>
+                Follow
+              </button>
+            )}
+            <button className="icon-btn ghost" type="button" aria-label="Thêm">
               <MoreIcon />
             </button>
           </div>
@@ -58,24 +69,29 @@ export default function PostCard({ post, onToggleLike, onToggleRepost }) {
             className={`icon-btn action${liked ? ' liked' : ''}`}
             type="button"
             aria-pressed={liked}
-            aria-label="Like"
+            aria-label="Thích"
             onClick={() => onToggleLike(post.id)}
           >
             <HeartIcon filled={liked} />
           </button>
-          <button className="icon-btn action" type="button" aria-label="Reply">
+          <button
+            className="icon-btn action"
+            type="button"
+            aria-label="Trả lời"
+            onClick={() => onReply(post)}
+          >
             <CommentIcon />
           </button>
           <button
             className={`icon-btn action${reposted ? ' reposted' : ''}`}
             type="button"
             aria-pressed={reposted}
-            aria-label="Repost"
+            aria-label="Đăng lại"
             onClick={() => onToggleRepost(post.id)}
           >
             <RepostIcon active={reposted} />
           </button>
-          <button className="icon-btn action" type="button" aria-label="Share">
+          <button className="icon-btn action" type="button" aria-label="Chia sẻ">
             <ShareIcon />
           </button>
         </div>

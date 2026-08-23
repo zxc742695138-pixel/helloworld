@@ -3,6 +3,9 @@ export const currentUser = {
   handle: 'you',
   initials: 'Y',
   color: '#6366f1',
+  bio: 'Đang học React & triển khai app thật 🚀',
+  followers: 128,
+  following: 97,
 }
 
 export const initialPosts = [
@@ -14,13 +17,13 @@ export const initialPosts = [
     color: '#f97316',
     verified: true,
     time: '2h',
-    text: 'Vừa deploy xong app đầu tay lên Render 🎉 cảm giác thấy code mình chạy thật ngoài đời khác hẳn hẳn so với chạy local.',
+    text: 'Vừa deploy xong app đầu tay lên Render 🎉 cảm giác thấy code mình chạy thật ngoài đời khác hẳn so với chạy local.',
     likes: 128,
     replies: 14,
     reposts: 6,
     liked: false,
     reposted: false,
-    canFollow: false,
+    mine: false,
   },
   {
     id: 2,
@@ -36,7 +39,7 @@ export const initialPosts = [
     reposts: 22,
     liked: true,
     reposted: false,
-    canFollow: true,
+    mine: false,
   },
   {
     id: 3,
@@ -52,7 +55,7 @@ export const initialPosts = [
     reposts: 3,
     liked: false,
     reposted: false,
-    canFollow: false,
+    mine: false,
   },
   {
     id: 4,
@@ -68,7 +71,7 @@ export const initialPosts = [
     reposts: 1,
     liked: false,
     reposted: false,
-    canFollow: true,
+    mine: false,
   },
   {
     id: 5,
@@ -84,6 +87,75 @@ export const initialPosts = [
     reposts: 12,
     liked: false,
     reposted: true,
-    canFollow: false,
+    mine: false,
+  },
+]
+
+// Accounts already followed by default — everyone else starts as "not followed".
+export const initialFollowing = ['maianh.codes', 'trangthu', 'ngoc.ui']
+
+export const accounts = initialPosts.map(({ name, handle, initials, color, verified }) => ({
+  name,
+  handle,
+  initials,
+  color,
+  verified,
+}))
+
+export const initialNotifications = [
+  {
+    id: 1,
+    type: 'like',
+    name: 'Duy Khang',
+    handle: 'khang.dev',
+    initials: 'DK',
+    color: '#0ea5e9',
+    text: 'đã thích bài viết của bạn',
+    time: '5 phút',
+    read: false,
+  },
+  {
+    id: 2,
+    type: 'reply',
+    name: 'Thu Trang',
+    handle: 'trangthu',
+    initials: 'TT',
+    color: '#ec4899',
+    text: 'đã trả lời: "Ý hay đó!"',
+    time: '1 giờ',
+    read: false,
+  },
+  {
+    id: 3,
+    type: 'follow',
+    name: 'Bảo Ngọc',
+    handle: 'ngoc.ui',
+    initials: 'BN',
+    color: '#a855f7',
+    text: 'đã bắt đầu theo dõi bạn',
+    time: '3 giờ',
+    read: true,
+  },
+  {
+    id: 4,
+    type: 'repost',
+    name: 'Hoàng Long',
+    handle: 'long.builds',
+    initials: 'HL',
+    color: '#22c55e',
+    text: 'đã đăng lại bài viết của bạn',
+    time: '1 ngày',
+    read: true,
+  },
+  {
+    id: 5,
+    type: 'like',
+    name: 'Mai Anh',
+    handle: 'maianh.codes',
+    initials: 'MA',
+    color: '#f97316',
+    text: 'đã thích bài viết của bạn',
+    time: '2 ngày',
+    read: true,
   },
 ]

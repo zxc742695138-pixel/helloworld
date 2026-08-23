@@ -110,6 +110,32 @@ export function SunIcon(props) {
   )
 }
 
+export function UserPlusIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="9.5" cy="8" r="3.5" />
+      <path d="M3.5 20c.7-3.4 3.2-5.5 6-5.5s5.3 2.1 6 5.5" />
+      <path d="M18.5 8.5v5M16 11h5" />
+    </svg>
+  )
+}
+
+export function CloseIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="m5 5 14 14M19 5 5 19" />
+    </svg>
+  )
+}
+
+export function CheckIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="m4 12.5 5 5L20 6.5" />
+    </svg>
+  )
+}
+
 export function MoonIcon(props) {
   return (
     <svg {...base} {...props} fill="currentColor" stroke="none">
