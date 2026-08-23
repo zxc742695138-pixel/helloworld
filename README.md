@@ -1,6 +1,8 @@
-# Hello World
+# Loop
 
-A simple React + Vite Hello World app.
+A static, client-only social feed UI built with React + Vite — styled after
+Threads. No backend: likes/reposts are local UI state only, everything
+resets on reload.
 
 **Live**: https://helloworld-viwz.onrender.com
 
