@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from './components/Header'
 import BottomNav from './components/BottomNav'
 import HomeView from './components/HomeView'
@@ -8,7 +8,7 @@ import ProfileView from './components/ProfileView'
 import PostDetail from './components/PostDetail'
 import ComposeModal from './components/ComposeModal'
 import Toast from './components/Toast'
-import { initialItems, initialFollowing, initialNotifications, currentUser } from './data'
+import { useCloudData } from './useCloudData'
 import './App.css'
 
 function getInitialTheme() {
@@ -18,12 +18,22 @@ function getInitialTheme() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-let nextItemId = 1000
-
 function App() {
-  const [items, setItems] = useState(initialItems)
-  const [following, setFollowing] = useState(() => new Set(initialFollowing))
-  const [notifications, setNotifications] = useState(initialNotifications)
+  const {
+    ready,
+    profile,
+    posts,
+    accounts,
+    following,
+    notifications,
+    toggleLike,
+    toggleRepost,
+    toggleFollow,
+    addPost,
+    markNotifRead,
+    markAllRead,
+  } = useCloudData()
+
   const [tab, setTab] = useState('home')
   const [theme, setTheme] = useState(getInitialTheme)
   const [composeOpen, setComposeOpen] = useState(false)
@@ -41,124 +51,47 @@ function App() {
     return () => clearTimeout(t)
   }, [toast])
 
-  // Every post/reply carries a live `replies` count and up to 3 distinct
-  // repliers' avatars, both derived from how many items point at it as
-  // their parent — never stored, always accurate.
-  const itemsWithCounts = useMemo(() => {
-    const childrenByParent = new Map()
-    for (const item of items) {
-      if (item.parentId != null) {
-        if (!childrenByParent.has(item.parentId)) childrenByParent.set(item.parentId, [])
-        childrenByParent.get(item.parentId).push(item)
-      }
-    }
-    return items.map((item) => {
-      const children = childrenByParent.get(item.id) || []
-      const seenHandles = new Set()
-      const replierAvatars = []
-      for (let i = children.length - 1; i >= 0 && replierAvatars.length < 3; i--) {
-        const child = children[i]
-        if (seenHandles.has(child.handle)) continue
-        seenHandles.add(child.handle)
-        replierAvatars.push({ initials: child.initials, color: child.color })
-      }
-      return { ...item, replies: children.length, replierAvatars }
-    })
-  }, [items])
-
-  const topLevelPosts = itemsWithCounts.filter((i) => !i.parentId)
-
-  function toggleLike(id) {
-    setItems((prev) => prev.map((p) => (p.id === id ? { ...p, liked: !p.liked } : p)))
+  if (!ready) {
+    return (
+      <div className="app-shell app-loading">
+        <div className="loading-spinner" aria-label="Đang tải" />
+      </div>
+    )
   }
 
-  function toggleRepost(id) {
-    setItems((prev) => prev.map((p) => (p.id === id ? { ...p, reposted: !p.reposted } : p)))
+  const topLevelPosts = posts.filter((i) => !i.parentId)
+
+  async function handleToggleFollow(handle) {
+    const wasFollowing = following.has(handle)
+    await toggleFollow(handle)
+    setToast(wasFollowing ? `Đã bỏ theo dõi @${handle}` : `Đã theo dõi @${handle}`)
   }
 
-  function toggleFollow(handle) {
-    setFollowing((prev) => {
-      const next = new Set(prev)
-      if (next.has(handle)) {
-        next.delete(handle)
-        setToast(`Đã bỏ theo dõi @${handle}`)
-      } else {
-        next.add(handle)
-        setToast(`Đã theo dõi @${handle}`)
-      }
-      return next
-    })
-  }
-
-  function markNotifRead(id) {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
-  }
-
-  function markAllRead() {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-    setToast('Đã đánh dấu đã đọc tất cả')
-  }
-
-  function submitCompose(text) {
-    const newPost = {
-      id: nextItemId++,
-      parentId: null,
-      name: currentUser.name,
-      handle: currentUser.handle,
-      initials: currentUser.initials,
-      color: currentUser.color,
-      verified: false,
-      time: 'Vừa xong',
-      text,
-      likes: 0,
-      reposts: 0,
-      liked: false,
-      reposted: false,
-      mine: true,
-    }
-    setItems((prev) => [newPost, ...prev])
+  async function submitCompose(text) {
+    await addPost(text)
     setToast('Đã đăng bài!')
     setTab('home')
     setComposeOpen(false)
   }
 
-  function addReply(parentId, text) {
-    const newReply = {
-      id: nextItemId++,
-      parentId,
-      name: currentUser.name,
-      handle: currentUser.handle,
-      initials: currentUser.initials,
-      color: currentUser.color,
-      verified: false,
-      time: 'Vừa xong',
-      text,
-      likes: 0,
-      reposts: 0,
-      liked: false,
-      reposted: false,
-      mine: true,
-    }
-    setItems((prev) => [...prev, newReply])
+  async function handleAddReply(parentId, text) {
+    await addPost(text, parentId)
     setToast('Đã gửi phản hồi')
   }
 
   const hasUnread = notifications.some((n) => !n.read)
-  const openPost = openPostId ? itemsWithCounts.find((p) => p.id === openPostId) : null
-  const openPostChildren = openPost
-    ? itemsWithCounts.filter((i) => i.parentId === openPost.id)
-    : []
-  const openPostParent = openPost?.parentId
-    ? itemsWithCounts.find((i) => i.id === openPost.parentId)
-    : null
+  const openPost = openPostId ? posts.find((p) => p.id === openPostId) : null
+  const openPostChildren = openPost ? posts.filter((i) => i.parentId === openPost.id) : []
+  const openPostParent = openPost?.parentId ? posts.find((i) => i.id === openPost.parentId) : null
 
   const sharedFeedProps = {
     posts: topLevelPosts,
     following,
     onToggleLike: toggleLike,
     onToggleRepost: toggleRepost,
-    onToggleFollow: toggleFollow,
+    onToggleFollow: handleToggleFollow,
     onOpenPost: (post) => setOpenPostId(post.id),
+    currentUser: profile,
   }
 
   return (
@@ -179,19 +112,23 @@ function App() {
             following={following}
             onToggleLike={toggleLike}
             onToggleRepost={toggleRepost}
-            onToggleFollow={toggleFollow}
+            onToggleFollow={handleToggleFollow}
             onOpenPost={(p) => setOpenPostId(p.id)}
-            onAddReply={addReply}
+            onAddReply={handleAddReply}
+            currentUser={profile}
           />
         ) : (
           <>
             {tab === 'home' && <HomeView {...sharedFeedProps} onOpenCompose={() => setComposeOpen(true)} />}
-            {tab === 'search' && <SearchView {...sharedFeedProps} />}
+            {tab === 'search' && <SearchView {...sharedFeedProps} accounts={accounts} />}
             {tab === 'activity' && (
               <ActivityView
                 notifications={notifications}
                 onMarkRead={markNotifRead}
-                onMarkAllRead={markAllRead}
+                onMarkAllRead={() => {
+                  markAllRead()
+                  setToast('Đã đánh dấu đã đọc tất cả')
+                }}
               />
             )}
             {tab === 'profile' && (
@@ -207,10 +144,13 @@ function App() {
           hasUnread={hasUnread}
           onNavigate={setTab}
           onOpenCompose={() => setComposeOpen(true)}
+          currentUser={profile}
         />
       )}
 
-      {composeOpen && <ComposeModal onClose={() => setComposeOpen(false)} onSubmit={submitCompose} />}
+      {composeOpen && (
+        <ComposeModal onClose={() => setComposeOpen(false)} onSubmit={submitCompose} currentUser={profile} />
+      )}
 
       <Toast message={toast} />
     </div>

@@ -2,13 +2,12 @@ import { useMemo, useState } from 'react'
 import Avatar from './Avatar'
 import PostCard from './PostCard'
 import { SearchIcon, VerifiedIcon } from './Icons'
-import { accounts } from '../data'
 
 function normalize(s) {
   return s.toLowerCase()
 }
 
-export default function SearchView({ posts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost }) {
+export default function SearchView({ posts, accounts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost }) {
   const [query, setQuery] = useState('')
   const q = normalize(query.trim())
 

@@ -1,8 +1,7 @@
 import Avatar from './Avatar'
 import PostCard from './PostCard'
-import { currentUser } from '../data'
 
-export default function ProfileView({ posts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost, onOpenCompose }) {
+export default function ProfileView({ posts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost, onOpenCompose, currentUser }) {
   const myPosts = posts.filter((p) => p.mine)
 
   return (

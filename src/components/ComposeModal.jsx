@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import Avatar from './Avatar'
 import { CloseIcon } from './Icons'
-import { currentUser } from '../data'
 
 const MAX_LEN = 280
 
-export default function ComposeModal({ onClose, onSubmit }) {
+export default function ComposeModal({ onClose, onSubmit, currentUser }) {
   const [text, setText] = useState('')
   const textareaRef = useRef(null)
 

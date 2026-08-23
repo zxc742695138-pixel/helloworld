@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import Avatar from './Avatar'
 import PostCard from './PostCard'
 import { CloseIcon } from './Icons'
-import { currentUser } from '../data'
 
 export default function PostDetail({
   post,
@@ -14,6 +13,7 @@ export default function PostDetail({
   onToggleFollow,
   onOpenPost,
   onAddReply,
+  currentUser,
 }) {
   const [text, setText] = useState('')
   const [replyTarget, setReplyTarget] = useState(post)

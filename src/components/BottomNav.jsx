@@ -1,8 +1,7 @@
 import { HomeIcon, SearchIcon, ComposeIcon, ActivityIcon } from './Icons'
 import Avatar from './Avatar'
-import { currentUser } from '../data'
 
-export default function BottomNav({ active, hasUnread, onNavigate, onOpenCompose }) {
+export default function BottomNav({ active, hasUnread, onNavigate, onOpenCompose, currentUser }) {
   return (
     <nav className="bottom-nav" aria-label="Điều hướng chính">
       <button
