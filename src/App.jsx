@@ -41,16 +41,29 @@ function App() {
     return () => clearTimeout(t)
   }, [toast])
 
-  // Every post/reply carries a live `replies` count derived from how many
-  // items point at it as their parent — never stored, always accurate.
+  // Every post/reply carries a live `replies` count and up to 3 distinct
+  // repliers' avatars, both derived from how many items point at it as
+  // their parent — never stored, always accurate.
   const itemsWithCounts = useMemo(() => {
-    const childCount = new Map()
+    const childrenByParent = new Map()
     for (const item of items) {
       if (item.parentId != null) {
-        childCount.set(item.parentId, (childCount.get(item.parentId) || 0) + 1)
+        if (!childrenByParent.has(item.parentId)) childrenByParent.set(item.parentId, [])
+        childrenByParent.get(item.parentId).push(item)
       }
     }
-    return items.map((item) => ({ ...item, replies: childCount.get(item.id) || 0 }))
+    return items.map((item) => {
+      const children = childrenByParent.get(item.id) || []
+      const seenHandles = new Set()
+      const replierAvatars = []
+      for (let i = children.length - 1; i >= 0 && replierAvatars.length < 3; i--) {
+        const child = children[i]
+        if (seenHandles.has(child.handle)) continue
+        seenHandles.add(child.handle)
+        replierAvatars.push({ initials: child.initials, color: child.color })
+      }
+      return { ...item, replies: children.length, replierAvatars }
+    })
   }, [items])
 
   const topLevelPosts = itemsWithCounts.filter((i) => !i.parentId)

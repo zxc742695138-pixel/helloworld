@@ -33,6 +33,7 @@ export default function PostCard({
     text,
     likes,
     replies,
+    replierAvatars,
     reposts,
     liked,
     reposted,
@@ -107,9 +108,18 @@ export default function PostCard({
           </button>
         </div>
 
-        <p className="post-meta">
-          {formatCount(replies)} phản hồi · {formatCount(likes + (liked ? 1 : 0))} lượt thích
-        </p>
+        <div className="post-meta">
+          {replierAvatars?.length > 0 && (
+            <span className="replier-stack">
+              {replierAvatars.map((a, i) => (
+                <Avatar key={i} initials={a.initials} color={a.color} size={16} />
+              ))}
+            </span>
+          )}
+          <span>
+            {formatCount(replies)} phản hồi · {formatCount(likes + (liked ? 1 : 0))} lượt thích
+          </span>
+        </div>
       </div>
     </article>
   )
