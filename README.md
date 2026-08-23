@@ -1,16 +1,20 @@
-# React + Vite
+# Hello World
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A simple React + Vite Hello World app.
 
-Currently, two official plugins are available:
+**Live**: https://helloworld-viwz.onrender.com
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Deployment
 
-## React Compiler
+Hosted on [Render](https://render.com) as a Web Service, auto-deploying from the
+`claude/react-hello-world-app-aifp75` branch.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Build Command: `npm install; npm run build`
+- Start Command: `npm run preview -- --host 0.0.0.0 --port $PORT`
 
-## Expanding the Oxlint configuration
+## Local development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```bash
+npm install
+npm run dev
+```
