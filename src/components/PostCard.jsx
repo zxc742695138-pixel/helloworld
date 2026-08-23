@@ -22,6 +22,7 @@ export default function PostCard({
   onToggleFollow,
   onOpenPost,
   onCommentClick,
+  onOpenProfile,
   featured = false,
 }) {
   const {
@@ -52,17 +53,28 @@ export default function PostCard({
       className={`post${onOpenPost ? ' post-clickable' : ''}`}
       onClick={onOpenPost ? () => onOpenPost(post) : undefined}
     >
-      <Avatar initials={initials} color={color} />
+      <button
+        type="button"
+        className="avatar-btn"
+        aria-label={`Xem trang cá nhân ${name}`}
+        onClick={stop(() => onOpenProfile?.(handle))}
+      >
+        <Avatar initials={initials} color={color} />
+      </button>
 
       <div className="post-body">
         <header className="post-head">
-          <div className="post-who">
+          <button
+            type="button"
+            className="post-who post-who-btn"
+            onClick={stop(() => onOpenProfile?.(handle))}
+          >
             <span className="post-name">{name}</span>
             {verified && <VerifiedIcon />}
             <span className="post-handle">@{handle}</span>
             <span className="post-dot">·</span>
             <span className="post-time">{time}</span>
-          </div>
+          </button>
           <div className="post-head-right">
             {!isOwn && !isFollowing && (
               <button className="follow-btn" type="button" onClick={stop(() => onToggleFollow(handle))}>

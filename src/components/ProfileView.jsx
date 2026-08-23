@@ -1,17 +1,21 @@
 import Avatar from './Avatar'
 import PostCard from './PostCard'
+import { GearIcon } from './Icons'
 
-export default function ProfileView({ posts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost, onOpenCompose, currentUser }) {
+export default function ProfileView({ posts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost, onOpenCompose, onOpenSettings, currentUser }) {
   const myPosts = posts.filter((p) => p.mine)
 
   return (
     <div className="view">
       <div className="profile-header">
         <Avatar initials={currentUser.initials} color={currentUser.color} size={64} />
-        <div>
+        <div className="profile-header-info">
           <p className="post-name profile-name">{currentUser.name}</p>
           <p className="post-handle">@{currentUser.handle}</p>
         </div>
+        <button className="icon-btn" type="button" aria-label="Cài đặt" onClick={onOpenSettings}>
+          <GearIcon />
+        </button>
       </div>
 
       <p className="profile-bio">{currentUser.bio}</p>

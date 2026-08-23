@@ -5,6 +5,9 @@ import HomeView from './components/HomeView'
 import SearchView from './components/SearchView'
 import ActivityView from './components/ActivityView'
 import ProfileView from './components/ProfileView'
+import UserProfileView from './components/UserProfileView'
+import SettingsView from './components/SettingsView'
+import LikedPostsView from './components/LikedPostsView'
 import PostDetail from './components/PostDetail'
 import ComposeModal from './components/ComposeModal'
 import Toast from './components/Toast'
@@ -32,12 +35,13 @@ function App() {
     addPost,
     markNotifRead,
     markAllRead,
+    logOut,
   } = useCloudData()
 
   const [tab, setTab] = useState('home')
   const [theme, setTheme] = useState(getInitialTheme)
   const [composeOpen, setComposeOpen] = useState(false)
-  const [openPostId, setOpenPostId] = useState(null)
+  const [screenStack, setScreenStack] = useState([])
   const [toast, setToast] = useState('')
 
   useEffect(() => {
@@ -60,6 +64,49 @@ function App() {
   }
 
   const topLevelPosts = posts.filter((i) => !i.parentId)
+  const screen = screenStack[screenStack.length - 1] ?? null
+
+  function pushScreen(next) {
+    setScreenStack((prev) => [...prev, next])
+  }
+
+  function popScreen() {
+    setScreenStack((prev) => prev.slice(0, -1))
+  }
+
+  function goToFeed() {
+    setScreenStack([])
+  }
+
+  function openProfile(handle) {
+    if (handle === profile.handle) {
+      setTab('profile')
+      goToFeed()
+    } else {
+      pushScreen({ type: 'profile', handle })
+    }
+  }
+
+  function openSettings() {
+    pushScreen({ type: 'settings' })
+  }
+
+  function showUnavailable() {
+    setToast('Chưa hỗ trợ trong bản demo này')
+  }
+
+  function openActivityFromSettings() {
+    setTab('activity')
+    goToFeed()
+  }
+
+  async function handleLogOut() {
+    if (!window.confirm('Đăng xuất sẽ tạo một danh tính khách mới. Tiếp tục?')) return
+    goToFeed()
+    setTab('home')
+    await logOut()
+    setToast('Đã đăng xuất — bạn đang dùng danh tính khách mới')
+  }
 
   async function handleToggleFollow(handle) {
     const wasFollowing = following.has(handle)
@@ -71,6 +118,7 @@ function App() {
     await addPost(text)
     setToast('Đã đăng bài!')
     setTab('home')
+    goToFeed()
     setComposeOpen(false)
   }
 
@@ -80,7 +128,7 @@ function App() {
   }
 
   const hasUnread = notifications.some((n) => !n.read)
-  const openPost = openPostId ? posts.find((p) => p.id === openPostId) : null
+  const openPost = screen?.type === 'post' ? posts.find((p) => p.id === screen.id) : null
   const openPostChildren = openPost ? posts.filter((i) => i.parentId === openPost.id) : []
   const openPostParent = openPost?.parentId ? posts.find((i) => i.id === openPost.parentId) : null
 
@@ -90,21 +138,34 @@ function App() {
     onToggleLike: toggleLike,
     onToggleRepost: toggleRepost,
     onToggleFollow: handleToggleFollow,
-    onOpenPost: (post) => setOpenPostId(post.id),
+    onOpenPost: (post) => pushScreen({ type: 'post', id: post.id }),
+    onOpenProfile: openProfile,
     currentUser: profile,
   }
+
+  const headerTitle =
+    screen?.type === 'post'
+      ? 'Bài viết'
+      : screen?.type === 'profile'
+        ? `@${screen.handle}`
+        : screen?.type === 'settings'
+          ? 'Cài đặt'
+          : screen?.type === 'liked'
+            ? 'Đã thích'
+            : ''
 
   return (
     <div className="app-shell">
       <Header
         theme={theme}
         onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
-        mode={openPost ? 'detail' : 'feed'}
-        onBack={() => setOpenPostId(openPost?.parentId ?? null)}
+        mode={screen ? 'detail' : 'feed'}
+        title={headerTitle}
+        onBack={popScreen}
       />
 
       <main className="feed">
-        {openPost ? (
+        {screen?.type === 'post' && openPost && (
           <PostDetail
             post={openPost}
             parent={openPostParent}
@@ -113,11 +174,47 @@ function App() {
             onToggleLike={toggleLike}
             onToggleRepost={toggleRepost}
             onToggleFollow={handleToggleFollow}
-            onOpenPost={(p) => setOpenPostId(p.id)}
+            onOpenPost={(p) => pushScreen({ type: 'post', id: p.id })}
+            onOpenProfile={openProfile}
             onAddReply={handleAddReply}
             currentUser={profile}
           />
-        ) : (
+        )}
+
+        {screen?.type === 'profile' && (
+          <UserProfileView
+            handle={screen.handle}
+            posts={posts}
+            following={following}
+            onToggleLike={toggleLike}
+            onToggleRepost={toggleRepost}
+            onToggleFollow={handleToggleFollow}
+            onOpenPost={(p) => pushScreen({ type: 'post', id: p.id })}
+          />
+        )}
+
+        {screen?.type === 'settings' && (
+          <SettingsView
+            onOpenLiked={() => pushScreen({ type: 'liked' })}
+            onOpenActivity={openActivityFromSettings}
+            onLogOut={handleLogOut}
+            onUnavailable={showUnavailable}
+          />
+        )}
+
+        {screen?.type === 'liked' && (
+          <LikedPostsView
+            posts={posts}
+            following={following}
+            onToggleLike={toggleLike}
+            onToggleRepost={toggleRepost}
+            onToggleFollow={handleToggleFollow}
+            onOpenPost={(p) => pushScreen({ type: 'post', id: p.id })}
+            onOpenProfile={openProfile}
+          />
+        )}
+
+        {!screen && (
           <>
             {tab === 'home' && <HomeView {...sharedFeedProps} onOpenCompose={() => setComposeOpen(true)} />}
             {tab === 'search' && <SearchView {...sharedFeedProps} accounts={accounts} />}
@@ -132,13 +229,13 @@ function App() {
               />
             )}
             {tab === 'profile' && (
-              <ProfileView {...sharedFeedProps} onOpenCompose={() => setComposeOpen(true)} />
+              <ProfileView {...sharedFeedProps} onOpenCompose={() => setComposeOpen(true)} onOpenSettings={openSettings} />
             )}
           </>
         )}
       </main>
 
-      {!openPost && (
+      {!screen && (
         <BottomNav
           active={tab}
           hasUnread={hasUnread}

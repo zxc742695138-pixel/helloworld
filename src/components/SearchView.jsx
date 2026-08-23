@@ -7,7 +7,7 @@ function normalize(s) {
   return s.toLowerCase()
 }
 
-export default function SearchView({ posts, accounts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost }) {
+export default function SearchView({ posts, accounts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost, onOpenProfile }) {
   const [query, setQuery] = useState('')
   const q = normalize(query.trim())
 
@@ -16,7 +16,7 @@ export default function SearchView({ posts, accounts, following, onToggleLike, o
     return accounts.filter(
       (a) => normalize(a.name).includes(q) || normalize(a.handle).includes(q),
     )
-  }, [q])
+  }, [q, accounts])
 
   const matchedPosts = useMemo(() => {
     if (!q) return []
@@ -50,7 +50,7 @@ export default function SearchView({ posts, accounts, following, onToggleLike, o
         <>
           <p className="section-label">Tài khoản gợi ý</p>
           {accounts.map((a) => (
-            <div className="account-row" key={a.handle}>
+            <button className="account-row" type="button" key={a.handle} onClick={() => onOpenProfile(a.handle)}>
               <Avatar initials={a.initials} color={a.color} />
               <div className="account-row-info">
                 <span className="post-name">
@@ -60,15 +60,31 @@ export default function SearchView({ posts, accounts, following, onToggleLike, o
                 <span className="post-handle">@{a.handle}</span>
               </div>
               {following.has(a.handle) ? (
-                <button className="follow-btn following" type="button" onClick={() => onToggleFollow(a.handle)}>
+                <span
+                  className="follow-btn following"
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleFollow(a.handle)
+                  }}
+                >
                   Đang theo dõi
-                </button>
+                </span>
               ) : (
-                <button className="follow-btn" type="button" onClick={() => onToggleFollow(a.handle)}>
+                <span
+                  className="follow-btn"
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleFollow(a.handle)
+                  }}
+                >
                   Follow
-                </button>
+                </span>
               )}
-            </div>
+            </button>
           ))}
         </>
       )}
@@ -81,7 +97,7 @@ export default function SearchView({ posts, accounts, following, onToggleLike, o
         <>
           <p className="section-label">Tài khoản</p>
           {matchedAccounts.map((a) => (
-            <div className="account-row" key={a.handle}>
+            <button className="account-row" type="button" key={a.handle} onClick={() => onOpenProfile(a.handle)}>
               <Avatar initials={a.initials} color={a.color} />
               <div className="account-row-info">
                 <span className="post-name">
@@ -91,15 +107,31 @@ export default function SearchView({ posts, accounts, following, onToggleLike, o
                 <span className="post-handle">@{a.handle}</span>
               </div>
               {following.has(a.handle) ? (
-                <button className="follow-btn following" type="button" onClick={() => onToggleFollow(a.handle)}>
+                <span
+                  className="follow-btn following"
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleFollow(a.handle)
+                  }}
+                >
                   Đang theo dõi
-                </button>
+                </span>
               ) : (
-                <button className="follow-btn" type="button" onClick={() => onToggleFollow(a.handle)}>
+                <span
+                  className="follow-btn"
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleFollow(a.handle)
+                  }}
+                >
                   Follow
-                </button>
+                </span>
               )}
-            </div>
+            </button>
           ))}
         </>
       )}
@@ -117,6 +149,7 @@ export default function SearchView({ posts, accounts, following, onToggleLike, o
               onToggleRepost={onToggleRepost}
               onToggleFollow={onToggleFollow}
               onOpenPost={onOpenPost}
+              onOpenProfile={onOpenProfile}
             />
           ))}
         </>

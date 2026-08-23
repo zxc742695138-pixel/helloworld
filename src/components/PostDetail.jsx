@@ -12,6 +12,7 @@ export default function PostDetail({
   onToggleRepost,
   onToggleFollow,
   onOpenPost,
+  onOpenProfile,
   onAddReply,
   currentUser,
 }) {
@@ -54,6 +55,7 @@ export default function PostDetail({
         onToggleRepost={onToggleRepost}
         onToggleFollow={onToggleFollow}
         onCommentClick={() => setReplyTarget(post)}
+        onOpenProfile={onOpenProfile}
         featured
       />
 
@@ -73,6 +75,7 @@ export default function PostDetail({
           onToggleRepost={onToggleRepost}
           onToggleFollow={onToggleFollow}
           onOpenPost={onOpenPost}
+          onOpenProfile={onOpenProfile}
           onCommentClick={setReplyTarget}
         />
       ))}

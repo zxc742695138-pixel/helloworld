@@ -1,6 +1,6 @@
 import { SunIcon, MoonIcon, BackIcon } from './Icons'
 
-export default function Header({ theme, onToggleTheme, mode, onBack }) {
+export default function Header({ theme, onToggleTheme, mode, title, onBack }) {
   const isDetail = mode === 'detail'
 
   return (
@@ -14,7 +14,7 @@ export default function Header({ theme, onToggleTheme, mode, onBack }) {
       )}
 
       {isDetail ? (
-        <span className="modal-title">Bài viết</span>
+        <span className="modal-title">{title}</span>
       ) : (
         <div className="brand" aria-label="Loop">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none">

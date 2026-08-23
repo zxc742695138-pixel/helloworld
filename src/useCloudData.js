@@ -15,7 +15,7 @@ import {
   where,
   writeBatch,
 } from 'firebase/firestore'
-import { onAuthStateChanged, signInAnonymously } from 'firebase/auth'
+import { onAuthStateChanged, signInAnonymously, signOut } from 'firebase/auth'
 import { auth, db, guestProfileFromUid } from './firebase'
 
 function formatRelativeTime(date) {
@@ -260,6 +260,13 @@ export function useCloudData() {
     await batch.commit()
   }
 
+  // Anonymous auth has no real account to log out of — signing out just
+  // drops this uid and the auth listener immediately signs back in
+  // anonymously with a fresh one, so it reads as "become a new guest".
+  async function logOut() {
+    await signOut(auth)
+  }
+
   return {
     ready: !!profile && posts !== null,
     uid,
@@ -274,5 +281,6 @@ export function useCloudData() {
     addPost,
     markNotifRead,
     markAllRead,
+    logOut,
   }
 }
