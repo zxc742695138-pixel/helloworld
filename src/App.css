@@ -665,9 +665,9 @@
   max-width: 620px;
   box-sizing: border-box;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -675,8 +675,29 @@
   border-inline: 1px solid var(--border);
 }
 
+.reply-compose-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reply-target-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 2px 2px 48px;
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+}
+
+.reply-target-chip .icon-btn {
+  width: 24px;
+  height: 24px;
+  color: var(--text-tertiary);
+}
+
 .view:has(.reply-compose) {
-  padding-bottom: 68px;
+  padding-bottom: 80px;
 }
 
 @media (max-width: 640px) {

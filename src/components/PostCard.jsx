@@ -21,6 +21,7 @@ export default function PostCard({
   onToggleRepost,
   onToggleFollow,
   onOpenPost,
+  onCommentClick,
 }) {
   const {
     name,
@@ -87,8 +88,8 @@ export default function PostCard({
           <button
             className="icon-btn action"
             type="button"
-            aria-label="Xem phản hồi"
-            onClick={stop(() => onOpenPost(post))}
+            aria-label="Trả lời"
+            onClick={stop(() => (onCommentClick ? onCommentClick(post) : onOpenPost(post)))}
           >
             <CommentIcon />
           </button>

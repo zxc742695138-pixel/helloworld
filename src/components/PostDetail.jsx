@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Avatar from './Avatar'
 import PostCard from './PostCard'
+import { CloseIcon } from './Icons'
 import { currentUser } from '../data'
 
 export default function PostDetail({
@@ -15,13 +16,24 @@ export default function PostDetail({
   onAddReply,
 }) {
   const [text, setText] = useState('')
+  const [replyTarget, setReplyTarget] = useState(post)
+
+  // Reset which item the composer targets whenever we navigate to a
+  // different thread page.
+  useEffect(() => {
+    setReplyTarget(post)
+    setText('')
+  }, [post.id])
 
   function submit() {
     const trimmed = text.trim()
     if (!trimmed) return
-    onAddReply(post.id, trimmed)
+    onAddReply(replyTarget.id, trimmed)
     setText('')
+    setReplyTarget(post)
   }
+
+  const replyingToChild = replyTarget.id !== post.id
 
   return (
     <div className="view">
@@ -41,6 +53,7 @@ export default function PostDetail({
         onToggleLike={onToggleLike}
         onToggleRepost={onToggleRepost}
         onToggleFollow={onToggleFollow}
+        onCommentClick={() => setReplyTarget(post)}
       />
 
       <p className="section-label">Phản hồi</p>
@@ -59,29 +72,47 @@ export default function PostDetail({
           onToggleRepost={onToggleRepost}
           onToggleFollow={onToggleFollow}
           onOpenPost={onOpenPost}
+          onCommentClick={setReplyTarget}
         />
       ))}
 
       <div className="reply-compose">
-        <Avatar initials={currentUser.initials} color={currentUser.color} size={36} />
-        <input
-          className="reply-input"
-          type="text"
-          placeholder={`Trả lời @${post.handle}...`}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') submit()
-          }}
-        />
-        <button
-          className="post-btn post-btn-active"
-          type="button"
-          disabled={!text.trim()}
-          onClick={submit}
-        >
-          Gửi
-        </button>
+        {replyingToChild && (
+          <div className="reply-target-chip">
+            <span>
+              Đang trả lời <span className="post-name">@{replyTarget.handle}</span>
+            </span>
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label="Hủy, trả lời bài chính"
+              onClick={() => setReplyTarget(post)}
+            >
+              <CloseIcon width={14} height={14} />
+            </button>
+          </div>
+        )}
+        <div className="reply-compose-row">
+          <Avatar initials={currentUser.initials} color={currentUser.color} size={36} />
+          <input
+            className="reply-input"
+            type="text"
+            placeholder={`Trả lời @${replyTarget.handle}...`}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') submit()
+            }}
+          />
+          <button
+            className="post-btn post-btn-active"
+            type="button"
+            disabled={!text.trim()}
+            onClick={submit}
+          >
+            Gửi
+          </button>
+        </div>
       </div>
     </div>
   )
