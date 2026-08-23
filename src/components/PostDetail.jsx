@@ -3,9 +3,18 @@ import Avatar from './Avatar'
 import PostCard from './PostCard'
 import { currentUser } from '../data'
 
-export default function PostDetail({ post, following, onToggleLike, onToggleRepost, onToggleFollow, onAddReply }) {
+export default function PostDetail({
+  post,
+  parent,
+  replies,
+  following,
+  onToggleLike,
+  onToggleRepost,
+  onToggleFollow,
+  onOpenPost,
+  onAddReply,
+}) {
   const [text, setText] = useState('')
-  const replies = post.repliesList || []
 
   function submit() {
     const trimmed = text.trim()
@@ -16,6 +25,15 @@ export default function PostDetail({ post, following, onToggleLike, onToggleRepo
 
   return (
     <div className="view">
+      {parent && (
+        <button className="parent-preview" type="button" onClick={() => onOpenPost(parent)}>
+          <Avatar initials={parent.initials} color={parent.color} size={28} />
+          <span className="parent-preview-text">
+            Đang trả lời <span className="post-name">{parent.name}</span> · {parent.text}
+          </span>
+        </button>
+      )}
+
       <PostCard
         post={post}
         isFollowing={following.has(post.handle)}
@@ -31,19 +49,17 @@ export default function PostDetail({ post, following, onToggleLike, onToggleRepo
         <p className="empty-state">Chưa có phản hồi nào. Hãy là người đầu tiên!</p>
       )}
 
-      {replies.map((r, i) => (
-        <div className="reply-row" key={i}>
-          <Avatar initials={r.initials} color={r.color} size={36} />
-          <div className="reply-row-body">
-            <p className="post-who">
-              <span className="post-name">{r.name}</span>
-              <span className="post-handle">@{r.handle}</span>
-              <span className="post-dot">·</span>
-              <span className="post-time">{r.time}</span>
-            </p>
-            <p className="post-text">{r.text}</p>
-          </div>
-        </div>
+      {replies.map((reply) => (
+        <PostCard
+          key={reply.id}
+          post={reply}
+          isFollowing={following.has(reply.handle)}
+          isOwn={reply.mine}
+          onToggleLike={onToggleLike}
+          onToggleRepost={onToggleRepost}
+          onToggleFollow={onToggleFollow}
+          onOpenPost={onOpenPost}
+        />
       ))}
 
       <div className="reply-compose">

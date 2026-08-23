@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Header from './components/Header'
 import BottomNav from './components/BottomNav'
 import HomeView from './components/HomeView'
@@ -8,7 +8,7 @@ import ProfileView from './components/ProfileView'
 import PostDetail from './components/PostDetail'
 import ComposeModal from './components/ComposeModal'
 import Toast from './components/Toast'
-import { initialPosts, initialFollowing, initialNotifications, currentUser } from './data'
+import { initialItems, initialFollowing, initialNotifications, currentUser } from './data'
 import './App.css'
 
 function getInitialTheme() {
@@ -18,10 +18,10 @@ function getInitialTheme() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-let nextPostId = 1000
+let nextItemId = 1000
 
 function App() {
-  const [posts, setPosts] = useState(initialPosts)
+  const [items, setItems] = useState(initialItems)
   const [following, setFollowing] = useState(() => new Set(initialFollowing))
   const [notifications, setNotifications] = useState(initialNotifications)
   const [tab, setTab] = useState('home')
@@ -41,12 +41,26 @@ function App() {
     return () => clearTimeout(t)
   }, [toast])
 
+  // Every post/reply carries a live `replies` count derived from how many
+  // items point at it as their parent — never stored, always accurate.
+  const itemsWithCounts = useMemo(() => {
+    const childCount = new Map()
+    for (const item of items) {
+      if (item.parentId != null) {
+        childCount.set(item.parentId, (childCount.get(item.parentId) || 0) + 1)
+      }
+    }
+    return items.map((item) => ({ ...item, replies: childCount.get(item.id) || 0 }))
+  }, [items])
+
+  const topLevelPosts = itemsWithCounts.filter((i) => !i.parentId)
+
   function toggleLike(id) {
-    setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, liked: !p.liked } : p)))
+    setItems((prev) => prev.map((p) => (p.id === id ? { ...p, liked: !p.liked } : p)))
   }
 
   function toggleRepost(id) {
-    setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, reposted: !p.reposted } : p)))
+    setItems((prev) => prev.map((p) => (p.id === id ? { ...p, reposted: !p.reposted } : p)))
   }
 
   function toggleFollow(handle) {
@@ -74,7 +88,8 @@ function App() {
 
   function submitCompose(text) {
     const newPost = {
-      id: nextPostId++,
+      id: nextItemId++,
+      parentId: null,
       name: currentUser.name,
       handle: currentUser.handle,
       initials: currentUser.initials,
@@ -83,49 +98,49 @@ function App() {
       time: 'Vừa xong',
       text,
       likes: 0,
-      replies: 0,
       reposts: 0,
       liked: false,
       reposted: false,
       mine: true,
-      repliesList: [],
     }
-    setPosts((prev) => [newPost, ...prev])
+    setItems((prev) => [newPost, ...prev])
     setToast('Đã đăng bài!')
     setTab('home')
     setComposeOpen(false)
   }
 
-  function addReply(postId, text) {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? {
-              ...p,
-              replies: p.replies + 1,
-              repliesList: [
-                ...(p.repliesList || []),
-                {
-                  name: currentUser.name,
-                  handle: currentUser.handle,
-                  initials: currentUser.initials,
-                  color: currentUser.color,
-                  text,
-                  time: 'Vừa xong',
-                },
-              ],
-            }
-          : p,
-      ),
-    )
+  function addReply(parentId, text) {
+    const newReply = {
+      id: nextItemId++,
+      parentId,
+      name: currentUser.name,
+      handle: currentUser.handle,
+      initials: currentUser.initials,
+      color: currentUser.color,
+      verified: false,
+      time: 'Vừa xong',
+      text,
+      likes: 0,
+      reposts: 0,
+      liked: false,
+      reposted: false,
+      mine: true,
+    }
+    setItems((prev) => [...prev, newReply])
     setToast('Đã gửi phản hồi')
   }
 
   const hasUnread = notifications.some((n) => !n.read)
-  const openPost = openPostId ? posts.find((p) => p.id === openPostId) : null
+  const openPost = openPostId ? itemsWithCounts.find((p) => p.id === openPostId) : null
+  const openPostChildren = openPost
+    ? itemsWithCounts.filter((i) => i.parentId === openPost.id)
+    : []
+  const openPostParent = openPost?.parentId
+    ? itemsWithCounts.find((i) => i.id === openPost.parentId)
+    : null
 
   const sharedFeedProps = {
-    posts,
+    posts: topLevelPosts,
     following,
     onToggleLike: toggleLike,
     onToggleRepost: toggleRepost,
@@ -139,17 +154,20 @@ function App() {
         theme={theme}
         onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
         mode={openPost ? 'detail' : 'feed'}
-        onBack={() => setOpenPostId(null)}
+        onBack={() => setOpenPostId(openPost?.parentId ?? null)}
       />
 
       <main className="feed">
         {openPost ? (
           <PostDetail
             post={openPost}
+            parent={openPostParent}
+            replies={openPostChildren}
             following={following}
             onToggleLike={toggleLike}
             onToggleRepost={toggleRepost}
             onToggleFollow={toggleFollow}
+            onOpenPost={(p) => setOpenPostId(p.id)}
             onAddReply={addReply}
           />
         ) : (
