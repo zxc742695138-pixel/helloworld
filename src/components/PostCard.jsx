@@ -117,7 +117,7 @@ export default function PostCard({
             onClick={stop(() => onToggleLike(post.id))}
           >
             <HeartIcon filled={liked} />
-            {featured && <span className="action-count">{formatCount(likes + (liked ? 1 : 0))}</span>}
+            {featured && <span className="action-count">{formatCount(likes)}</span>}
           </button>
           <button
             className={`icon-btn action${featured ? ' with-count' : ''}`}
@@ -152,7 +152,7 @@ export default function PostCard({
               </span>
             )}
             <span>
-              {formatCount(replies)} phản hồi · {formatCount(likes + (liked ? 1 : 0))} lượt thích
+              {formatCount(replies)} phản hồi · {formatCount(likes)} lượt thích
             </span>
           </div>
         )}
