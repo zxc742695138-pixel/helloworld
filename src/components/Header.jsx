@@ -1,4 +1,4 @@
-import { SunIcon, MoonIcon, BackIcon, SendIcon } from './Icons'
+import { SunIcon, MoonIcon, BackIcon, MessageCircleIcon } from './Icons'
 
 export default function Header({ theme, onToggleTheme, mode, title, onBack, onOpenInbox }) {
   const isDetail = mode === 'detail'
@@ -11,7 +11,7 @@ export default function Header({ theme, onToggleTheme, mode, title, onBack, onOp
         </button>
       ) : (
         <button className="icon-btn" type="button" onClick={onOpenInbox} aria-label="Tin nhắn">
-          <SendIcon />
+          <MessageCircleIcon />
         </button>
       )}
 

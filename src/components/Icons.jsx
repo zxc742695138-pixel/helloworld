@@ -284,6 +284,14 @@ export function SendIcon(props) {
   )
 }
 
+export function MessageCircleIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 3.5c-5 0-9 3.4-9 7.6 0 2.5 1.4 4.7 3.6 6.1-.1 1.1-.5 2.2-1.3 3.2 1.5-.2 2.9-.8 4.1-1.7.8.2 1.7.3 2.6.3 5 0 9-3.4 9-7.6s-4-7.9-9-7.9Z" />
+    </svg>
+  )
+}
+
 export function ImageIcon(props) {
   return (
     <svg {...base} {...props}>
