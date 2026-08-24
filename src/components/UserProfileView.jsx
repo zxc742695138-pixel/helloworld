@@ -13,6 +13,7 @@ export default function UserProfileView({
   onToggleRepost,
   onToggleFollow,
   onOpenPost,
+  onOpenChat,
 }) {
   const theirPosts = posts.filter((p) => p.handle === handle && !p.parentId)
   const sample = posts.find((p) => p.handle === handle)
@@ -66,13 +67,30 @@ export default function UserProfileView({
         </span>
       </div>
 
-      <button
-        className={`follow-btn profile-follow-btn${isFollowing ? ' following' : ''}`}
-        type="button"
-        onClick={() => onToggleFollow(handle)}
-      >
-        {isFollowing ? 'Đang theo dõi' : 'Follow'}
-      </button>
+      <div className="profile-action-row">
+        <button
+          className={`follow-btn profile-follow-btn${isFollowing ? ' following' : ''}`}
+          type="button"
+          onClick={() => onToggleFollow(handle)}
+        >
+          {isFollowing ? 'Đang theo dõi' : 'Follow'}
+        </button>
+        <button
+          className="follow-btn profile-follow-btn"
+          type="button"
+          onClick={() =>
+            onOpenChat({
+              uid: sample.authorUid,
+              name: sample.name,
+              handle: sample.handle,
+              initials: sample.initials,
+              color: sample.color,
+            })
+          }
+        >
+          Nhắn tin
+        </button>
+      </div>
 
       <p className="section-label">Bài viết</p>
 

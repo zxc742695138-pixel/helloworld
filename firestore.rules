@@ -48,5 +48,37 @@ service cloud.firestore {
 
       allow delete: if false;
     }
+
+    match /conversations/{convId} {
+      allow read: if request.auth != null && request.auth.uid in resource.data.participants;
+
+      // convId must be the two participants' uids sorted and joined — the
+      // same deterministic scheme the client uses to find a thread without
+      // a query — so nobody can create a doc under someone else's id.
+      allow create: if request.auth != null
+        && request.auth.uid in request.resource.data.participants
+        && request.resource.data.participants.size() == 2
+        && convId == request.resource.data.participants[0] + '_' + request.resource.data.participants[1];
+
+      // Only lastMessage/updatedAt/typing may change after creation.
+      allow update: if request.auth != null
+        && request.auth.uid in resource.data.participants
+        && request.resource.data.participants == resource.data.participants
+        && request.resource.data.participantInfo == resource.data.participantInfo;
+
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(convId)).data.participants;
+
+        allow create: if request.auth != null
+          && request.resource.data.senderUid == request.auth.uid
+          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(convId)).data.participants;
+
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
   }
 }

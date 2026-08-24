@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import { initializeFirestore } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
+import { getStorage } from 'firebase/storage'
 
 // Firebase web config values are public identifiers, not secrets — real
 // access control lives in Firestore security rules, so it's safe to ship
@@ -21,6 +22,7 @@ export const app = initializeApp(firebaseConfig)
 // for everyone else.
 export const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true })
 export const auth = getAuth(app)
+export const storage = getStorage(app)
 
 const GUEST_COLORS = ['#f97316', '#0ea5e9', '#ec4899', '#22c55e', '#a855f7', '#eab308', '#14b8a6', '#ef4444']
 

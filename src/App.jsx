@@ -8,10 +8,13 @@ import ProfileView from './components/ProfileView'
 import UserProfileView from './components/UserProfileView'
 import SettingsView from './components/SettingsView'
 import LikedPostsView from './components/LikedPostsView'
+import InboxView from './components/InboxView'
+import ChatView from './components/ChatView'
 import PostDetail from './components/PostDetail'
 import ComposeModal from './components/ComposeModal'
 import Toast from './components/Toast'
 import { useCloudData } from './useCloudData'
+import { startConversation } from './chat'
 import './App.css'
 
 function getInitialTheme() {
@@ -24,6 +27,7 @@ function getInitialTheme() {
 function App() {
   const {
     ready,
+    uid,
     profile,
     posts,
     accounts,
@@ -91,6 +95,20 @@ function App() {
     pushScreen({ type: 'settings' })
   }
 
+  function openInbox() {
+    pushScreen({ type: 'inbox' })
+  }
+
+  async function openChat(other) {
+    const me = { uid, name: profile.name, handle: profile.handle, initials: profile.initials, color: profile.color }
+    const convId = await startConversation(me, other)
+    pushScreen({ type: 'chat', convId, other })
+  }
+
+  function openChatDirect(convId, other) {
+    pushScreen({ type: 'chat', convId, other })
+  }
+
   function showUnavailable() {
     setToast('Chưa hỗ trợ trong bản demo này')
   }
@@ -152,7 +170,11 @@ function App() {
           ? 'Cài đặt'
           : screen?.type === 'liked'
             ? 'Đã thích'
-            : ''
+            : screen?.type === 'inbox'
+              ? 'Tin nhắn'
+              : screen?.type === 'chat'
+                ? screen.other.name
+                : ''
 
   return (
     <div className="app-shell">
@@ -162,6 +184,7 @@ function App() {
         mode={screen ? 'detail' : 'feed'}
         title={headerTitle}
         onBack={popScreen}
+        onOpenInbox={openInbox}
       />
 
       <main className="feed">
@@ -190,6 +213,17 @@ function App() {
             onToggleRepost={toggleRepost}
             onToggleFollow={handleToggleFollow}
             onOpenPost={(p) => pushScreen({ type: 'post', id: p.id })}
+            onOpenChat={openChat}
+          />
+        )}
+
+        {screen?.type === 'inbox' && <InboxView uid={uid} onOpenChat={openChatDirect} />}
+
+        {screen?.type === 'chat' && (
+          <ChatView
+            convId={screen.convId}
+            other={screen.other}
+            currentUser={{ uid, name: profile.name, handle: profile.handle, initials: profile.initials, color: profile.color }}
           />
         )}
 

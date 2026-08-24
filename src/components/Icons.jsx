@@ -275,6 +275,25 @@ export function HistoryIcon(props) {
   )
 }
 
+export function SendIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="m4 12 15-8-6 16-3-6-6-2Z" />
+      <path d="M13 11 8.5 15.5" />
+    </svg>
+  )
+}
+
+export function ImageIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" />
+      <circle cx="9" cy="10" r="1.6" />
+      <path d="m5 17.5 5-5 3.5 3.5L18 11l1.5 1.5" />
+    </svg>
+  )
+}
+
 export function LogOutIcon(props) {
   return (
     <svg {...base} {...props}>

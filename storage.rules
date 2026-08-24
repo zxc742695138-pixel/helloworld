@@ -1,0 +1,15 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Chat images: any signed-in user (anonymous included) can read and
+    // upload, matching the trust level of the rest of this demo — nobody
+    // has a real account, so per-conversation access control isn't
+    // enforceable at the Storage layer without custom auth claims.
+    match /chat-images/{convId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

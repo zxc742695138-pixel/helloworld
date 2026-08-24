@@ -1,8 +1,9 @@
 # Loop
 
 A React + Vite social feed UI styled after Threads, backed by Firebase
-(Firestore + Anonymous Auth) — posts, replies, likes, reposts, follows, and
-notifications are real and shared live between every visitor, not local UI
+(Firestore + Anonymous Auth + Storage) — posts, replies, likes, reposts,
+follows, notifications, and 1:1 realtime chat (with typing indicators and
+image sharing) are real and shared live between every visitor, not local UI
 state.
 
 **Live**: https://helloworld-viwz.onrender.com
@@ -18,12 +19,31 @@ different.
 ## Firebase setup
 
 1. Firestore Database (Native mode), Authentication → Anonymous sign-in enabled.
-2. Paste `firestore.rules` into Firestore → Rules in the console and publish.
-3. Authentication → Settings → Authorized domains: add whatever domain the
+2. Storage → Get started (default bucket is fine — it's already referenced
+   in `src/firebase.js`'s `storageBucket`).
+3. Paste `firestore.rules` into Firestore → Rules in the console and publish
+   (re-paste after every update, this file now also covers `conversations`
+   and `conversations/*/messages` for chat).
+4. Paste `storage.rules` into Storage → Rules and publish (covers chat
+   image uploads under `chat-images/**`).
+5. Authentication → Settings → Authorized domains: add whatever domain the
    app is actually served from (Anonymous sign-in fails with
    `auth/unauthorized-domain` otherwise). `localhost` is included by default.
-4. `node scripts/seed-firestore.mjs` seeds the `posts` collection with demo
+6. `node scripts/seed-firestore.mjs` seeds the `posts` collection with demo
    content once, if it's empty — safe to skip or re-run.
+
+## Chat
+
+Tap the message icon (top-left on the main tabs) for your inbox, or "Nhắn
+tin" on someone's profile to start a thread with them. A conversation's
+Firestore doc id is the two participants' uids sorted and joined
+(`conversationId` in `src/chat.js`), so starting a chat is idempotent — no
+query needed to find an existing thread. Typing state lives in a `typing`
+map field on the conversation doc, written on keystroke and cleared after
+~2.5s of inactivity or on send/unmount; the other client treats it as stale
+after 5s so a closed tab doesn't leave "typing…" stuck forever. Images
+upload to Storage under `chat-images/{convId}/` before the message doc (with
+its download URL) is written.
 
 ## Deployment
 
