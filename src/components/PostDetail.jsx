@@ -8,9 +8,15 @@ export default function PostDetail({
   parent,
   replies,
   following,
+  blocked,
   onToggleLike,
   onToggleRepost,
   onToggleFollow,
+  onToggleSave,
+  onToggleHidden,
+  onToggleBlock,
+  onReport,
+  onUnavailable,
   onOpenPost,
   onOpenProfile,
   onAddReply,
@@ -51,9 +57,15 @@ export default function PostDetail({
         post={post}
         isFollowing={following.has(post.handle)}
         isOwn={post.mine}
+        isBlocked={blocked.has(post.handle)}
         onToggleLike={onToggleLike}
         onToggleRepost={onToggleRepost}
         onToggleFollow={onToggleFollow}
+        onToggleSave={onToggleSave}
+        onToggleHidden={onToggleHidden}
+        onToggleBlock={onToggleBlock}
+        onReport={onReport}
+        onUnavailable={onUnavailable}
         onCommentClick={() => setReplyTarget(post)}
         onOpenProfile={onOpenProfile}
         featured
@@ -71,9 +83,15 @@ export default function PostDetail({
           post={reply}
           isFollowing={following.has(reply.handle)}
           isOwn={reply.mine}
+          isBlocked={blocked.has(reply.handle)}
           onToggleLike={onToggleLike}
           onToggleRepost={onToggleRepost}
           onToggleFollow={onToggleFollow}
+          onToggleSave={onToggleSave}
+          onToggleHidden={onToggleHidden}
+          onToggleBlock={onToggleBlock}
+          onReport={onReport}
+          onUnavailable={onUnavailable}
           onOpenPost={onOpenPost}
           onOpenProfile={onOpenProfile}
           onCommentClick={setReplyTarget}

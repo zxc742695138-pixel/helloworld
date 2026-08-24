@@ -22,8 +22,9 @@ different.
 2. Storage → Get started (default bucket is fine — it's already referenced
    in `src/firebase.js`'s `storageBucket`).
 3. Paste `firestore.rules` into Firestore → Rules in the console and publish
-   (re-paste after every update, this file now also covers `conversations`
-   and `conversations/*/messages` for chat).
+   (re-paste after every update — this file also covers `conversations` and
+   `conversations/*/messages` for chat, and `blocks`/`reports` for the post
+   "..." menu).
 4. Paste `storage.rules` into Storage → Rules and publish (covers chat
    image uploads under `chat-images/**`).
 5. Authentication → Settings → Authorized domains: add whatever domain the
@@ -44,6 +45,19 @@ map field on the conversation doc, written on keystroke and cleared after
 after 5s so a closed tab doesn't leave "typing…" stuck forever. Images
 upload to Storage under `chat-images/{convId}/` before the message doc (with
 its download URL) is written.
+
+## Post "..." menu
+
+Every post's overflow menu is a real feature, not a mockup, modeled after
+Threads': copy a shareable link, save/unsave (feeds the "Đã lưu" list in
+Settings), hide a post from your own home feed ("Không quan tâm", stored per
+post per viewer), and — on someone else's post — block them (hides their
+posts from your home feed, auto-unfollows, stored in `blocks` exactly like
+`follows`) or report the post (write-only `reports` collection, no client
+read). "Hỏi Meta AI" is left out entirely rather than faked, since there's
+no real AI behind it here; "Tắt thông báo" and "Hạn chế" show a "not
+available in this demo" toast since they'd need a thread-subscription /
+account-restriction system this app doesn't have.
 
 ## Deployment
 

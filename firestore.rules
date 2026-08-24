@@ -8,12 +8,15 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.likedBy == []
-        && request.resource.data.repostedBy == [];
+        && request.resource.data.repostedBy == []
+        && request.resource.data.savedBy == []
+        && request.resource.data.hiddenBy == [];
 
-      // Liking/reposting only ever toggles the caller's own uid in one of
-      // these two arrays — text, author, and everything else stay frozen.
+      // Liking/reposting/saving/hiding only ever toggles the caller's own
+      // uid in one of these arrays — text, author, and everything else
+      // stay frozen.
       allow update: if request.auth != null
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likedBy', 'repostedBy'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likedBy', 'repostedBy', 'savedBy', 'hiddenBy'])
         && request.resource.data.text == resource.data.text
         && request.resource.data.authorUid == resource.data.authorUid
         && request.resource.data.parentId == resource.data.parentId;
@@ -32,6 +35,29 @@ service cloud.firestore {
         && resource.data.followerUid == request.auth.uid;
 
       allow update: if false;
+    }
+
+    match /blocks/{blockId} {
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null
+        && request.resource.data.blockerUid == request.auth.uid
+        && blockId == request.auth.uid + '_' + request.resource.data.handle;
+
+      allow delete: if request.auth != null
+        && resource.data.blockerUid == request.auth.uid;
+
+      allow update: if false;
+    }
+
+    match /reports/{reportId} {
+      allow read: if false;
+
+      allow create: if request.auth != null
+        && request.resource.data.reporterUid == request.auth.uid;
+
+      allow update: if false;
+      allow delete: if false;
     }
 
     match /notifications/{notifId} {

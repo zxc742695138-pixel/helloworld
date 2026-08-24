@@ -7,7 +7,22 @@ function normalize(s) {
   return s.toLowerCase()
 }
 
-export default function SearchView({ posts, accounts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost, onOpenProfile }) {
+export default function SearchView({
+  posts,
+  accounts,
+  following,
+  blocked,
+  onToggleLike,
+  onToggleRepost,
+  onToggleFollow,
+  onToggleSave,
+  onToggleHidden,
+  onToggleBlock,
+  onReport,
+  onUnavailable,
+  onOpenPost,
+  onOpenProfile,
+}) {
   const [query, setQuery] = useState('')
   const q = normalize(query.trim())
 
@@ -145,9 +160,15 @@ export default function SearchView({ posts, accounts, following, onToggleLike, o
               post={post}
               isFollowing={following.has(post.handle)}
               isOwn={post.mine}
+              isBlocked={blocked.has(post.handle)}
               onToggleLike={onToggleLike}
               onToggleRepost={onToggleRepost}
               onToggleFollow={onToggleFollow}
+              onToggleSave={onToggleSave}
+              onToggleHidden={onToggleHidden}
+              onToggleBlock={onToggleBlock}
+              onReport={onReport}
+              onUnavailable={onUnavailable}
               onOpenPost={onOpenPost}
               onOpenProfile={onOpenProfile}
             />

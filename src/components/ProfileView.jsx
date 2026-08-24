@@ -2,7 +2,23 @@ import Avatar from './Avatar'
 import PostCard from './PostCard'
 import { GearIcon } from './Icons'
 
-export default function ProfileView({ posts, following, onToggleLike, onToggleRepost, onToggleFollow, onOpenPost, onOpenCompose, onOpenSettings, currentUser }) {
+export default function ProfileView({
+  posts,
+  following,
+  blocked,
+  onToggleLike,
+  onToggleRepost,
+  onToggleFollow,
+  onToggleSave,
+  onToggleHidden,
+  onToggleBlock,
+  onReport,
+  onUnavailable,
+  onOpenPost,
+  onOpenCompose,
+  onOpenSettings,
+  currentUser,
+}) {
   const myPosts = posts.filter((p) => p.mine)
 
   return (
@@ -48,9 +64,15 @@ export default function ProfileView({ posts, following, onToggleLike, onToggleRe
             post={post}
             isFollowing={following.has(post.handle)}
             isOwn
+            isBlocked={blocked.has(post.handle)}
             onToggleLike={onToggleLike}
             onToggleRepost={onToggleRepost}
             onToggleFollow={onToggleFollow}
+            onToggleSave={onToggleSave}
+            onToggleHidden={onToggleHidden}
+            onToggleBlock={onToggleBlock}
+            onReport={onReport}
+            onUnavailable={onUnavailable}
             onOpenPost={onOpenPost}
           />
         ))

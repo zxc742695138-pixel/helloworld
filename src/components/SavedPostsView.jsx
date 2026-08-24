@@ -1,6 +1,6 @@
 import PostCard from './PostCard'
 
-export default function LikedPostsView({
+export default function SavedPostsView({
   posts,
   following,
   blocked,
@@ -15,14 +15,14 @@ export default function LikedPostsView({
   onOpenPost,
   onOpenProfile,
 }) {
-  const liked = posts.filter((p) => p.liked)
+  const saved = posts.filter((p) => p.saved)
 
   return (
     <div className="view">
-      {liked.length === 0 ? (
-        <p className="empty-state">Bạn chưa thích bài viết nào.</p>
+      {saved.length === 0 ? (
+        <p className="empty-state">Bạn chưa lưu bài viết nào.</p>
       ) : (
-        liked.map((post) => (
+        saved.map((post) => (
           <PostCard
             key={post.id}
             post={post}

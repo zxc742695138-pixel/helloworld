@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import Avatar from './Avatar'
+import MoreMenu from './MoreMenu'
 import {
   HeartIcon,
   CommentIcon,
@@ -17,14 +19,21 @@ export default function PostCard({
   post,
   isFollowing,
   isOwn,
+  isBlocked,
   onToggleLike,
   onToggleRepost,
   onToggleFollow,
+  onToggleSave,
+  onToggleHidden,
+  onToggleBlock,
+  onReport,
+  onUnavailable,
   onOpenPost,
   onCommentClick,
   onOpenProfile,
   featured = false,
 }) {
+  const [moreOpen, setMoreOpen] = useState(false)
   const {
     name,
     handle,
@@ -46,6 +55,11 @@ export default function PostCard({
       e.stopPropagation()
       fn()
     }
+  }
+
+  function copyLink() {
+    const url = `${window.location.origin}${window.location.pathname}?post=${post.id}`
+    navigator.clipboard?.writeText(url).catch(() => {})
   }
 
   return (
@@ -81,7 +95,12 @@ export default function PostCard({
                 Follow
               </button>
             )}
-            <button className="icon-btn ghost" type="button" aria-label="Thêm" onClick={stop(() => {})}>
+            <button
+              className="icon-btn ghost"
+              type="button"
+              aria-label="Thêm"
+              onClick={stop(() => setMoreOpen(true))}
+            >
               <MoreIcon />
             </button>
           </div>
@@ -138,6 +157,22 @@ export default function PostCard({
           </div>
         )}
       </div>
+
+      {moreOpen && (
+        <MoreMenu
+          post={post}
+          isOwn={isOwn}
+          isBlocked={isBlocked}
+          onClose={() => setMoreOpen(false)}
+          onCopyLink={copyLink}
+          onToggleSave={() => onToggleSave(post.id)}
+          onToggleHidden={() => onToggleHidden(post.id)}
+          onMuteThread={onUnavailable}
+          onRestrict={onUnavailable}
+          onToggleBlock={() => onToggleBlock(handle)}
+          onReport={() => onReport(post.id)}
+        />
+      )}
     </article>
   )
 }

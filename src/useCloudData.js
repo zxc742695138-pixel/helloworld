@@ -60,6 +60,8 @@ function withDerivedFields(rawPosts, uid) {
       reposts: item.repostedBy.length,
       liked: uid ? item.likedBy.includes(uid) : false,
       reposted: uid ? item.repostedBy.includes(uid) : false,
+      saved: uid ? item.savedBy.includes(uid) : false,
+      hidden: uid ? item.hiddenBy.includes(uid) : false,
       mine: uid ? item.authorUid === uid : false,
       time: formatRelativeTime(item.createdAtDate),
     }
@@ -71,6 +73,7 @@ export function useCloudData() {
   const [profile, setProfile] = useState(null)
   const [rawPosts, setRawPosts] = useState(null) // null while the first snapshot hasn't arrived
   const [following, setFollowing] = useState(new Set())
+  const [blocked, setBlocked] = useState(new Set())
   const [followerCount, setFollowerCount] = useState(0)
   const [notifications, setNotifications] = useState([])
 
@@ -105,6 +108,8 @@ export function useCloudData() {
             createdAtDate: data.createdAt?.toDate ? data.createdAt.toDate() : null,
             likedBy: data.likedBy || [],
             repostedBy: data.repostedBy || [],
+            savedBy: data.savedBy || [],
+            hiddenBy: data.hiddenBy || [],
           }
         }),
       )
@@ -117,6 +122,15 @@ export function useCloudData() {
     const q = query(collection(db, 'follows'), where('followerUid', '==', uid))
     const unsub = onSnapshot(q, (snap) => {
       setFollowing(new Set(snap.docs.map((d) => d.data().handle)))
+    })
+    return unsub
+  }, [uid])
+
+  useEffect(() => {
+    if (!uid) return undefined
+    const q = query(collection(db, 'blocks'), where('blockerUid', '==', uid))
+    const unsub = onSnapshot(q, (snap) => {
+      setBlocked(new Set(snap.docs.map((d) => d.data().handle)))
     })
     return unsub
   }, [uid])
@@ -206,6 +220,48 @@ export function useCloudData() {
     }
   }
 
+  async function toggleSave(postId) {
+    if (!uid || !rawPosts) return
+    const post = rawPosts.find((p) => p.id === postId)
+    if (!post) return
+    const already = post.savedBy.includes(uid)
+    await updateDoc(doc(db, 'posts', postId), {
+      savedBy: already ? arrayRemove(uid) : arrayUnion(uid),
+    })
+  }
+
+  async function toggleHidden(postId) {
+    if (!uid || !rawPosts) return
+    const post = rawPosts.find((p) => p.id === postId)
+    if (!post) return
+    const already = post.hiddenBy.includes(uid)
+    await updateDoc(doc(db, 'posts', postId), {
+      hiddenBy: already ? arrayRemove(uid) : arrayUnion(uid),
+    })
+  }
+
+  async function toggleBlock(handle) {
+    if (!uid) return
+    const ref = doc(db, 'blocks', `${uid}_${handle}`)
+    if (blocked.has(handle)) {
+      await deleteDoc(ref)
+      return
+    }
+    await setDoc(ref, { blockerUid: uid, handle, createdAt: serverTimestamp() })
+    if (following.has(handle)) {
+      await deleteDoc(doc(db, 'follows', `${uid}_${handle}`))
+    }
+  }
+
+  async function reportPost(postId) {
+    if (!uid) return
+    await addDoc(collection(db, 'reports'), {
+      postId,
+      reporterUid: uid,
+      createdAt: serverTimestamp(),
+    })
+  }
+
   async function toggleFollow(handle) {
     if (!uid) return
     const ref = doc(db, 'follows', `${uid}_${handle}`)
@@ -233,6 +289,8 @@ export function useCloudData() {
       text,
       likedBy: [],
       repostedBy: [],
+      savedBy: [],
+      hiddenBy: [],
       createdAt: serverTimestamp(),
     })
     if (parentId) {
@@ -274,10 +332,15 @@ export function useCloudData() {
     posts,
     accounts,
     following,
+    blocked,
     notifications,
     toggleLike,
     toggleRepost,
     toggleFollow,
+    toggleSave,
+    toggleHidden,
+    toggleBlock,
+    reportPost,
     addPost,
     markNotifRead,
     markAllRead,

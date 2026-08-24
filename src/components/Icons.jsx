@@ -294,6 +294,68 @@ export function ImageIcon(props) {
   )
 }
 
+export function LinkIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M9.5 14.5 14.5 9.5" />
+      <path d="M11 6.5 12.8 4.7a3.6 3.6 0 0 1 5.1 5.1L16 11.6" />
+      <path d="M13 17.5 11.2 19.3a3.6 3.6 0 0 1-5.1-5.1L8 12.4" />
+    </svg>
+  )
+}
+
+export function EyeOffIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3.5 3.5l17 17" />
+      <path d="M10.6 5.2A10.4 10.4 0 0 1 12 5c5 0 8.8 3.4 10 7-.5 1.5-1.4 2.9-2.5 4.1" />
+      <path d="M6.5 6.9C4.6 8.1 3.1 9.9 2 12c1.2 3.6 5 7 10 7 1.3 0 2.6-.2 3.7-.7" />
+      <path d="M9.9 10a2.9 2.9 0 0 0 4.1 4.1" />
+    </svg>
+  )
+}
+
+export function BellOffIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3.5 3.5l17 17" />
+      <path d="M8.2 6.3A6 6 0 0 1 18 10.5c0 2.6.6 4 1.2 4.9M6 10.5c0 4-1.3 5.4-2 6.3h11" />
+      <path d="M10.3 19.5a2 2 0 0 0 3.4 0" />
+    </svg>
+  )
+}
+
+export function UserXIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M3 20c.9-3.4 3.2-5.5 6-5.5s5.1 2.1 6 5.5" />
+      <path d="m16.5 9 4.5 4.5M21 9l-4.5 4.5" />
+    </svg>
+  )
+}
+
+export function UsersRestrictIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="8.5" cy="8.5" r="3" />
+      <circle cx="16.5" cy="9.5" r="2.4" />
+      <path d="M3.5 20c.7-3 3-5 5-5s4.3 2 5 5" />
+      <path d="M14.5 15.8c1.6.2 3 1.9 3.5 4.2" />
+    </svg>
+  )
+}
+
+export function FlagIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v4.5" />
+      <circle cx="12" cy="15.6" r="0.15" fill="currentColor" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  )
+}
+
 export function LogOutIcon(props) {
   return (
     <svg {...base} {...props}>

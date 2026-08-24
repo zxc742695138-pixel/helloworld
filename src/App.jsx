@@ -8,6 +8,7 @@ import ProfileView from './components/ProfileView'
 import UserProfileView from './components/UserProfileView'
 import SettingsView from './components/SettingsView'
 import LikedPostsView from './components/LikedPostsView'
+import SavedPostsView from './components/SavedPostsView'
 import InboxView from './components/InboxView'
 import ChatView from './components/ChatView'
 import PostDetail from './components/PostDetail'
@@ -32,10 +33,15 @@ function App() {
     posts,
     accounts,
     following,
+    blocked,
     notifications,
     toggleLike,
     toggleRepost,
     toggleFollow,
+    toggleSave,
+    toggleHidden,
+    toggleBlock,
+    reportPost,
     addPost,
     markNotifRead,
     markAllRead,
@@ -67,7 +73,7 @@ function App() {
     )
   }
 
-  const topLevelPosts = posts.filter((i) => !i.parentId)
+  const topLevelPosts = posts.filter((i) => !i.parentId && !i.hidden && !blocked.has(i.handle))
   const screen = screenStack[screenStack.length - 1] ?? null
 
   function pushScreen(next) {
@@ -145,6 +151,32 @@ function App() {
     setToast('Đã gửi phản hồi')
   }
 
+  async function handleToggleSave(postId) {
+    const post = posts.find((p) => p.id === postId)
+    const wasSaved = post?.saved
+    await toggleSave(postId)
+    setToast(wasSaved ? 'Đã bỏ lưu' : 'Đã lưu bài viết')
+  }
+
+  async function handleToggleHidden(postId) {
+    await toggleHidden(postId)
+    setToast('Sẽ ít hiển thị bài viết như thế này hơn')
+  }
+
+  async function handleToggleBlock(handle) {
+    const isBlocked = blocked.has(handle)
+    if (!isBlocked && !window.confirm(`Chặn @${handle}? Bạn sẽ không thấy bài viết của họ trên trang chủ nữa.`)) {
+      return
+    }
+    await toggleBlock(handle)
+    setToast(isBlocked ? `Đã bỏ chặn @${handle}` : `Đã chặn @${handle}`)
+  }
+
+  async function handleReport(postId) {
+    await reportPost(postId)
+    setToast('Đã gửi báo cáo, cảm ơn bạn')
+  }
+
   const hasUnread = notifications.some((n) => !n.read)
   const openPost = screen?.type === 'post' ? posts.find((p) => p.id === screen.id) : null
   const openPostChildren = openPost ? posts.filter((i) => i.parentId === openPost.id) : []
@@ -153,9 +185,15 @@ function App() {
   const sharedFeedProps = {
     posts: topLevelPosts,
     following,
+    blocked,
     onToggleLike: toggleLike,
     onToggleRepost: toggleRepost,
     onToggleFollow: handleToggleFollow,
+    onToggleSave: handleToggleSave,
+    onToggleHidden: handleToggleHidden,
+    onToggleBlock: handleToggleBlock,
+    onReport: handleReport,
+    onUnavailable: showUnavailable,
     onOpenPost: (post) => pushScreen({ type: 'post', id: post.id }),
     onOpenProfile: openProfile,
     currentUser: profile,
@@ -170,11 +208,13 @@ function App() {
           ? 'Cài đặt'
           : screen?.type === 'liked'
             ? 'Đã thích'
-            : screen?.type === 'inbox'
-              ? 'Tin nhắn'
-              : screen?.type === 'chat'
-                ? screen.other.name
-                : ''
+            : screen?.type === 'saved'
+              ? 'Đã lưu'
+              : screen?.type === 'inbox'
+                ? 'Tin nhắn'
+                : screen?.type === 'chat'
+                  ? screen.other.name
+                  : ''
 
   return (
     <div className="app-shell">
@@ -194,9 +234,15 @@ function App() {
             parent={openPostParent}
             replies={openPostChildren}
             following={following}
+            blocked={blocked}
             onToggleLike={toggleLike}
             onToggleRepost={toggleRepost}
             onToggleFollow={handleToggleFollow}
+            onToggleSave={handleToggleSave}
+            onToggleHidden={handleToggleHidden}
+            onToggleBlock={handleToggleBlock}
+            onReport={handleReport}
+            onUnavailable={showUnavailable}
             onOpenPost={(p) => pushScreen({ type: 'post', id: p.id })}
             onOpenProfile={openProfile}
             onAddReply={handleAddReply}
@@ -209,9 +255,15 @@ function App() {
             handle={screen.handle}
             posts={posts}
             following={following}
+            blocked={blocked}
             onToggleLike={toggleLike}
             onToggleRepost={toggleRepost}
             onToggleFollow={handleToggleFollow}
+            onToggleSave={handleToggleSave}
+            onToggleHidden={handleToggleHidden}
+            onToggleBlock={handleToggleBlock}
+            onReport={handleReport}
+            onUnavailable={showUnavailable}
             onOpenPost={(p) => pushScreen({ type: 'post', id: p.id })}
             onOpenChat={openChat}
           />
@@ -230,6 +282,7 @@ function App() {
         {screen?.type === 'settings' && (
           <SettingsView
             onOpenLiked={() => pushScreen({ type: 'liked' })}
+            onOpenSaved={() => pushScreen({ type: 'saved' })}
             onOpenActivity={openActivityFromSettings}
             onLogOut={handleLogOut}
             onUnavailable={showUnavailable}
@@ -240,9 +293,33 @@ function App() {
           <LikedPostsView
             posts={posts}
             following={following}
+            blocked={blocked}
             onToggleLike={toggleLike}
             onToggleRepost={toggleRepost}
             onToggleFollow={handleToggleFollow}
+            onToggleSave={handleToggleSave}
+            onToggleHidden={handleToggleHidden}
+            onToggleBlock={handleToggleBlock}
+            onReport={handleReport}
+            onUnavailable={showUnavailable}
+            onOpenPost={(p) => pushScreen({ type: 'post', id: p.id })}
+            onOpenProfile={openProfile}
+          />
+        )}
+
+        {screen?.type === 'saved' && (
+          <SavedPostsView
+            posts={posts}
+            following={following}
+            blocked={blocked}
+            onToggleLike={toggleLike}
+            onToggleRepost={toggleRepost}
+            onToggleFollow={handleToggleFollow}
+            onToggleSave={handleToggleSave}
+            onToggleHidden={handleToggleHidden}
+            onToggleBlock={handleToggleBlock}
+            onReport={handleReport}
+            onUnavailable={showUnavailable}
             onOpenPost={(p) => pushScreen({ type: 'post', id: p.id })}
             onOpenProfile={openProfile}
           />

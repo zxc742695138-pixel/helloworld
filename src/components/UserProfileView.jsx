@@ -9,9 +9,15 @@ export default function UserProfileView({
   handle,
   posts,
   following,
+  blocked,
   onToggleLike,
   onToggleRepost,
   onToggleFollow,
+  onToggleSave,
+  onToggleHidden,
+  onToggleBlock,
+  onReport,
+  onUnavailable,
   onOpenPost,
   onOpenChat,
 }) {
@@ -103,9 +109,15 @@ export default function UserProfileView({
             post={post}
             isFollowing={following.has(post.handle)}
             isOwn={post.mine}
+            isBlocked={blocked.has(post.handle)}
             onToggleLike={onToggleLike}
             onToggleRepost={onToggleRepost}
             onToggleFollow={onToggleFollow}
+            onToggleSave={onToggleSave}
+            onToggleHidden={onToggleHidden}
+            onToggleBlock={onToggleBlock}
+            onReport={onReport}
+            onUnavailable={onUnavailable}
             onOpenPost={onOpenPost}
           />
         ))

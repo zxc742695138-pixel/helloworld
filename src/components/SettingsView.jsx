@@ -14,7 +14,7 @@ import {
   ChevronRightIcon,
 } from './Icons'
 
-export default function SettingsView({ onOpenLiked, onOpenActivity, onLogOut, onUnavailable }) {
+export default function SettingsView({ onOpenLiked, onOpenSaved, onOpenActivity, onLogOut, onUnavailable }) {
   const rows = [
     {
       icon: PersonIcon,
@@ -25,7 +25,7 @@ export default function SettingsView({ onOpenLiked, onOpenActivity, onLogOut, on
     },
     { icon: UserPlusIcon, label: 'Theo dõi và mời bạn bè', onClick: onUnavailable },
     { icon: BellIcon, label: 'Thông báo', onClick: onOpenActivity },
-    { icon: BookmarkIcon, label: 'Đã lưu', onClick: onUnavailable },
+    { icon: BookmarkIcon, label: 'Đã lưu', onClick: onOpenSaved },
     { icon: HeartIcon, label: 'Đã thích', onClick: onOpenLiked },
     { icon: HistoryIcon, label: 'Lưu trữ', onClick: onUnavailable },
     { icon: LockIcon, label: 'Quyền riêng tư', onClick: onUnavailable },
