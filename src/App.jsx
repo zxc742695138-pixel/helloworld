@@ -285,7 +285,6 @@ function App() {
             onOpenSaved={() => pushScreen({ type: 'saved' })}
             onOpenActivity={openActivityFromSettings}
             onLogOut={handleLogOut}
-            onUnavailable={showUnavailable}
           />
         )}
 

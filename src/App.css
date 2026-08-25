@@ -868,21 +868,6 @@
   font-size: 15px;
 }
 
-.settings-row-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-secondary);
-}
-
-.settings-row-sub {
-  font-size: 13px;
-  color: var(--text-tertiary);
-  line-height: 1.4;
-}
-
 .settings-row-chevron {
   flex-shrink: 0;
   color: var(--text-tertiary);
