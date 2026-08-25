@@ -32,6 +32,15 @@ different.
    `auth/unauthorized-domain` otherwise). `localhost` is included by default.
 6. `node scripts/seed-firestore.mjs` seeds the `posts` collection with demo
    content once, if it's empty — safe to skip or re-run.
+7. Firestore → Indexes: the Inbox screen queries `conversations` with
+   `array-contains` on `participants` plus `orderBy('updatedAt')`, which
+   needs a composite index. Firestore doesn't create this on its own — open
+   the Inbox once while signed into the Firebase console with this project
+   selected and check the browser console for a "The query requires an
+   index" error with a direct link, or add it manually under Firestore →
+   Indexes → Composite: collection `conversations`, fields `participants`
+   (Arrays) then `updatedAt` (Descending). Until this index exists, the
+   Inbox spins forever instead of loading.
 
 ## Chat
 
