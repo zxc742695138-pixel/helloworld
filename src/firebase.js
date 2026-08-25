@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { initializeFirestore } from 'firebase/firestore'
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
 import { getStorage } from 'firebase/storage'
 
@@ -20,7 +20,14 @@ export const app = initializeApp(firebaseConfig)
 // keeps things working behind restrictive corporate/proxy networks that
 // block the streaming upgrade, at the cost of a slightly slower handshake
 // for everyone else.
-export const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true })
+// Persistent (IndexedDB) local cache: reopening a chat re-renders instantly
+// from what's already on disk, and the SDK resumes its listener from where
+// it left off, so the server only has to send messages newer than the last
+// one already cached — not the whole conversation again.
+export const db = initializeFirestore(app, {
+  experimentalAutoDetectLongPolling: true,
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+})
 export const auth = getAuth(app)
 export const storage = getStorage(app)
 

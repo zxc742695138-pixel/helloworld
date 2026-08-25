@@ -55,6 +55,11 @@ after 5s so a closed tab doesn't leave "typing…" stuck forever. Images
 upload to Storage under `chat-images/{convId}/` before the message doc (with
 its download URL) is written.
 
+Firestore's IndexedDB persistence is enabled (see `src/firebase.js`), so a
+conversation you've already opened renders instantly from local cache and
+the SDK resumes its listener from a resume token — reopening a chat only
+pulls messages newer than what's already cached, not the full history again.
+
 ## Post "..." menu
 
 Every post's overflow menu is a real feature, not a mockup, modeled after
