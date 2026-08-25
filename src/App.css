@@ -1,6 +1,7 @@
 .app-shell {
   max-width: 620px;
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0 auto;
   border-inline: 1px solid var(--border);
   padding-bottom: 76px;
@@ -653,6 +654,7 @@
   max-width: 560px;
   background: var(--surface);
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -905,7 +907,6 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-height: calc(100vh - 52px);
 }
 
 .chat-messages {
