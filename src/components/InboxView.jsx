@@ -3,11 +3,17 @@ import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestor
 import Avatar from './Avatar'
 import { db } from '../firebase'
 
+// A cached inbox renders almost instantly, so don't flash a spinner for
+// that — only show one once loading has actually taken a moment.
+const SLOW_LOAD_MS = 400
+
 export default function InboxView({ uid, onOpenChat }) {
   const [conversations, setConversations] = useState(null)
   const [error, setError] = useState(null)
+  const [showSpinner, setShowSpinner] = useState(false)
 
   useEffect(() => {
+    const spinnerTimer = setTimeout(() => setShowSpinner(true), SLOW_LOAD_MS)
     const q = query(
       collection(db, 'conversations'),
       where('participants', 'array-contains', uid),
@@ -16,6 +22,8 @@ export default function InboxView({ uid, onOpenChat }) {
     const unsub = onSnapshot(
       q,
       (snap) => {
+        clearTimeout(spinnerTimer)
+        setShowSpinner(false)
         setError(null)
         setConversations(
           snap.docs.map((d) => {
@@ -30,11 +38,16 @@ export default function InboxView({ uid, onOpenChat }) {
         )
       },
       (err) => {
+        clearTimeout(spinnerTimer)
+        setShowSpinner(false)
         console.error('Inbox listener failed', err)
         setError(err)
       },
     )
-    return unsub
+    return () => {
+      clearTimeout(spinnerTimer)
+      unsub()
+    }
   }, [uid])
 
   if (error) {
@@ -42,7 +55,7 @@ export default function InboxView({ uid, onOpenChat }) {
   }
 
   if (conversations === null) {
-    return <div className="loading-spinner" style={{ margin: '32px auto' }} aria-label="Đang tải" />
+    return showSpinner ? <div className="loading-spinner" style={{ margin: '32px auto' }} aria-label="Đang tải" /> : null
   }
 
   if (conversations.length === 0) {
