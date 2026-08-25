@@ -5,8 +5,13 @@ import { SendIcon, ImageIcon, CloseIcon } from './Icons'
 import { db } from '../firebase'
 import { sendMessage, setTyping, TYPING_STALE_MS } from '../chat'
 
+// A cached conversation renders almost instantly, so don't flash a spinner
+// for that — only show one once loading has actually taken a moment.
+const SLOW_LOAD_MS = 400
+
 export default function ChatView({ convId, other, currentUser }) {
   const [messages, setMessages] = useState(null)
+  const [showSpinner, setShowSpinner] = useState(false)
   const [otherTypingAt, setOtherTypingAt] = useState(null)
   const [now, setNow] = useState(Date.now())
   const [text, setText] = useState('')
@@ -35,6 +40,15 @@ export default function ChatView({ convId, other, currentUser }) {
     })
     return unsub
   }, [convId])
+
+  useEffect(() => {
+    if (messages !== null) {
+      setShowSpinner(false)
+      return undefined
+    }
+    const t = setTimeout(() => setShowSpinner(true), SLOW_LOAD_MS)
+    return () => clearTimeout(t)
+  }, [messages])
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, 'conversations', convId), (snap) => {
@@ -108,7 +122,7 @@ export default function ChatView({ convId, other, currentUser }) {
     <div className="chat-view">
       <div className="chat-messages">
         {messages === null ? (
-          <div className="loading-spinner" style={{ margin: '32px auto' }} aria-label="Đang tải" />
+          showSpinner && <div className="loading-spinner" style={{ margin: '32px auto' }} aria-label="Đang tải" />
         ) : messages.length === 0 ? (
           <p className="empty-state">Chưa có tin nhắn nào. Nói lời chào đầu tiên!</p>
         ) : (
