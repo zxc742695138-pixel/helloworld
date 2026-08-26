@@ -6,6 +6,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   onSnapshot,
   orderBy,
   query,
@@ -15,8 +16,9 @@ import {
   where,
   writeBatch,
 } from 'firebase/firestore'
-import { onAuthStateChanged, signInAnonymously, signOut } from 'firebase/auth'
-import { auth, db, guestProfileFromUid } from './firebase'
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { onAuthStateChanged, signInAnonymously, signInWithPopup, signOut } from 'firebase/auth'
+import { auth, colorFromUid, db, googleProvider, guestProfileFromUid, slugifyHandle, storage } from './firebase'
 
 function formatRelativeTime(date) {
   if (!date) return 'Vừa xong'
@@ -50,7 +52,7 @@ function withDerivedFields(rawPosts, uid) {
       const child = children[i]
       if (seenHandles.has(child.handle)) continue
       seenHandles.add(child.handle)
-      replierAvatars.push({ initials: child.initials, color: child.color })
+      replierAvatars.push({ initials: child.initials, color: child.color, photoURL: child.photoURL })
     }
     return {
       ...item,
@@ -69,7 +71,10 @@ function withDerivedFields(rawPosts, uid) {
 }
 
 export function useCloudData() {
+  // 'loading' | 'signed-out' | 'needs-profile' | 'ready'
+  const [authStatus, setAuthStatus] = useState('loading')
   const [uid, setUid] = useState(null)
+  const [googleUserInfo, setGoogleUserInfo] = useState(null)
   const [profile, setProfile] = useState(null)
   const [rawPosts, setRawPosts] = useState(null) // null while the first snapshot hasn't arrived
   const [following, setFollowing] = useState(new Set())
@@ -79,15 +84,40 @@ export function useCloudData() {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUid(user.uid)
+      if (!user) {
+        setUid(null)
+        setProfile(null)
+        setGoogleUserInfo(null)
+        setAuthStatus('signed-out')
+        return
+      }
+      setUid(user.uid)
+      if (user.isAnonymous) {
+        setGoogleUserInfo(null)
         setProfile(guestProfileFromUid(user.uid))
+        setAuthStatus('ready')
       } else {
-        signInAnonymously(auth).catch((err) => console.error('Anonymous sign-in failed', err))
+        setGoogleUserInfo({ name: user.displayName || '', photoURL: user.photoURL || null })
       }
     })
     return unsub
   }, [])
+
+  // Google accounts (not anonymous) get a real profile document — look it
+  // up once we know who's signed in, and route to profile setup the first
+  // time there isn't one yet.
+  useEffect(() => {
+    if (!uid || !googleUserInfo) return undefined
+    const unsub = onSnapshot(doc(db, 'users', uid), (snap) => {
+      if (snap.exists()) {
+        setProfile(snap.data())
+        setAuthStatus('ready')
+      } else {
+        setAuthStatus('needs-profile')
+      }
+    })
+    return unsub
+  }, [uid, googleUserInfo])
 
   useEffect(() => {
     const q = query(collection(db, 'posts'), orderBy('createdAt', 'asc'))
@@ -102,6 +132,7 @@ export function useCloudData() {
             handle: data.handle,
             initials: data.initials,
             color: data.color,
+            photoURL: data.photoURL || null,
             verified: !!data.verified,
             authorUid: data.authorUid,
             text: data.text,
@@ -156,6 +187,7 @@ export function useCloudData() {
             handle: data.fromHandle,
             initials: data.fromInitials,
             color: data.fromColor,
+            photoURL: data.fromPhotoURL || null,
             text: data.text,
             time: formatRelativeTime(data.createdAt?.toDate ? data.createdAt.toDate() : null),
             read: !!data.read,
@@ -173,7 +205,14 @@ export function useCloudData() {
     const byHandle = new Map()
     for (const p of posts) {
       if (p.handle !== profile?.handle && !byHandle.has(p.handle)) {
-        byHandle.set(p.handle, { name: p.name, handle: p.handle, initials: p.initials, color: p.color, verified: p.verified })
+        byHandle.set(p.handle, {
+          name: p.name,
+          handle: p.handle,
+          initials: p.initials,
+          color: p.color,
+          photoURL: p.photoURL,
+          verified: p.verified,
+        })
       }
     }
     return [...byHandle.values()]
@@ -188,6 +227,7 @@ export function useCloudData() {
       fromHandle: profile.handle,
       fromInitials: profile.initials,
       fromColor: profile.color,
+      fromPhotoURL: profile.photoURL || null,
       read: false,
       createdAt: serverTimestamp(),
       ...payload,
@@ -242,12 +282,12 @@ export function useCloudData() {
 
   async function toggleBlock(handle) {
     if (!uid) return
-    const ref = doc(db, 'blocks', `${uid}_${handle}`)
+    const ref_ = doc(db, 'blocks', `${uid}_${handle}`)
     if (blocked.has(handle)) {
-      await deleteDoc(ref)
+      await deleteDoc(ref_)
       return
     }
-    await setDoc(ref, { blockerUid: uid, handle, createdAt: serverTimestamp() })
+    await setDoc(ref_, { blockerUid: uid, handle, createdAt: serverTimestamp() })
     if (following.has(handle)) {
       await deleteDoc(doc(db, 'follows', `${uid}_${handle}`))
     }
@@ -264,12 +304,12 @@ export function useCloudData() {
 
   async function toggleFollow(handle) {
     if (!uid) return
-    const ref = doc(db, 'follows', `${uid}_${handle}`)
+    const ref_ = doc(db, 'follows', `${uid}_${handle}`)
     if (following.has(handle)) {
-      await deleteDoc(ref)
+      await deleteDoc(ref_)
       return
     }
-    await setDoc(ref, { followerUid: uid, handle, createdAt: serverTimestamp() })
+    await setDoc(ref_, { followerUid: uid, handle, createdAt: serverTimestamp() })
     const target = rawPosts?.find((p) => p.handle === handle)
     if (target) {
       await notify(target.authorUid, { type: 'follow', text: 'đã bắt đầu theo dõi bạn' })
@@ -285,6 +325,7 @@ export function useCloudData() {
       handle: profile.handle,
       initials: profile.initials,
       color: profile.color,
+      photoURL: profile.photoURL || null,
       verified: false,
       text,
       likedBy: [],
@@ -318,15 +359,51 @@ export function useCloudData() {
     await batch.commit()
   }
 
-  // Anonymous auth has no real account to log out of — signing out just
-  // drops this uid and the auth listener immediately signs back in
-  // anonymously with a fresh one, so it reads as "become a new guest".
+  async function signInGuest() {
+    await signInAnonymously(auth)
+  }
+
+  async function signInGoogle() {
+    await signInWithPopup(auth, googleProvider)
+  }
+
+  // First-time Google sign-in: the caller already prefilled name/photo from
+  // the Google account (via googleUserInfo) and let the user edit them —
+  // this just persists the real profile document once.
+  async function completeProfile({ name, photoFile, photoURL }) {
+    if (!uid) return
+    const existing = await getDoc(doc(db, 'users', uid))
+    if (existing.exists()) return
+
+    let finalPhotoURL = photoURL || null
+    if (photoFile) {
+      const path = `avatars/${uid}/${Date.now()}_${photoFile.name}`
+      const storageRef = ref(storage, path)
+      await uploadBytes(storageRef, photoFile)
+      finalPhotoURL = await getDownloadURL(storageRef)
+    }
+
+    const trimmedName = name.trim() || 'Người dùng Loop'
+    await setDoc(doc(db, 'users', uid), {
+      name: trimmedName,
+      handle: slugifyHandle(trimmedName, uid),
+      initials: trimmedName[0].toUpperCase(),
+      color: colorFromUid(uid),
+      photoURL: finalPhotoURL,
+      bio: '',
+      provider: 'google',
+      createdAt: serverTimestamp(),
+    })
+  }
+
   async function logOut() {
     await signOut(auth)
   }
 
   return {
-    ready: !!profile && posts !== null,
+    authStatus,
+    googleUserInfo,
+    ready: authStatus === 'ready' && posts !== null,
     uid,
     profile: profile ? { ...profile, followers: followerCount, following: following.size } : null,
     posts,
@@ -344,6 +421,9 @@ export function useCloudData() {
     addPost,
     markNotifRead,
     markAllRead,
+    signInGuest,
+    signInGoogle,
+    completeProfile,
     logOut,
   }
 }

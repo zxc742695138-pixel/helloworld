@@ -1,4 +1,15 @@
-export default function Avatar({ initials, color, size = 40 }) {
+export default function Avatar({ initials, color, photoURL, size = 40 }) {
+  if (photoURL) {
+    return (
+      <img
+        className="avatar avatar-photo"
+        src={photoURL}
+        alt=""
+        style={{ width: size, height: size }}
+      />
+    )
+  }
+
   return (
     <div
       className="avatar"

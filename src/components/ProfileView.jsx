@@ -24,7 +24,7 @@ export default function ProfileView({
   return (
     <div className="view">
       <div className="profile-header">
-        <Avatar initials={currentUser.initials} color={currentUser.color} size={64} />
+        <Avatar initials={currentUser.initials} color={currentUser.color} photoURL={currentUser.photoURL} size={64} />
         <div className="profile-header-info">
           <p className="post-name profile-name">{currentUser.name}</p>
           <p className="post-handle">@{currentUser.handle}</p>

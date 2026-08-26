@@ -54,7 +54,7 @@ export default function ComposeModal({ onClose, onSubmit, currentUser }) {
 
         <div className="modal-body">
           <div className="modal-compose-row">
-            <Avatar initials={currentUser.initials} color={currentUser.color} />
+            <Avatar initials={currentUser.initials} color={currentUser.color} photoURL={currentUser.photoURL} />
             <textarea
               ref={textareaRef}
               className="modal-textarea"

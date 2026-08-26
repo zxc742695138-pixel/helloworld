@@ -66,7 +66,7 @@ export default function InboxView({ uid, onOpenChat }) {
     <div className="view">
       {conversations.map((c) => (
         <button key={c.id} type="button" className="account-row" onClick={() => onOpenChat(c.id, c.other)}>
-          <Avatar initials={c.other.initials} color={c.other.color} />
+          <Avatar initials={c.other.initials} color={c.other.color} photoURL={c.other.photoURL} />
           <div className="account-row-info">
             <span className="post-name">{c.other.name}</span>
             <span className="post-handle">

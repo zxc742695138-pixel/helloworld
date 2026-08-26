@@ -48,7 +48,7 @@ export default function BottomNav({ active, hasUnread, onNavigate, onOpenCompose
         aria-current={active === 'profile' ? 'page' : undefined}
         onClick={() => onNavigate('profile')}
       >
-        <Avatar initials={currentUser.initials} color={currentUser.color} size={26} />
+        <Avatar initials={currentUser.initials} color={currentUser.color} photoURL={currentUser.photoURL} size={26} />
       </button>
     </nav>
   )

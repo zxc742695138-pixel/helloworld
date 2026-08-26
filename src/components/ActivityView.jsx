@@ -45,7 +45,7 @@ export default function ActivityView({ notifications, onMarkRead, onMarkAllRead 
             <div className="notif-icon" style={{ color: colorByType[n.type] }}>
               <Icon width={18} height={18} filled={n.type === 'like'} active={n.type === 'repost'} />
             </div>
-            <Avatar initials={n.initials} color={n.color} size={36} />
+            <Avatar initials={n.initials} color={n.color} photoURL={n.photoURL} size={36} />
             <p className="notif-text">
               <span className="post-name">{n.name}</span> {n.text}
               <span className="post-dot"> · </span>

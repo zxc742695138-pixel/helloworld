@@ -66,7 +66,7 @@ export default function SearchView({
           <p className="section-label">Tài khoản gợi ý</p>
           {accounts.map((a) => (
             <button className="account-row" type="button" key={a.handle} onClick={() => onOpenProfile(a.handle)}>
-              <Avatar initials={a.initials} color={a.color} />
+              <Avatar initials={a.initials} color={a.color} photoURL={a.photoURL} />
               <div className="account-row-info">
                 <span className="post-name">
                   {a.name}
@@ -113,7 +113,7 @@ export default function SearchView({
           <p className="section-label">Tài khoản</p>
           {matchedAccounts.map((a) => (
             <button className="account-row" type="button" key={a.handle} onClick={() => onOpenProfile(a.handle)}>
-              <Avatar initials={a.initials} color={a.color} />
+              <Avatar initials={a.initials} color={a.color} photoURL={a.photoURL} />
               <div className="account-row-info">
                 <span className="post-name">
                   {a.name}

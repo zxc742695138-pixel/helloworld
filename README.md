@@ -1,35 +1,53 @@
 # Loop
 
 A React + Vite social feed UI styled after Threads, backed by Firebase
-(Firestore + Anonymous Auth + Storage) — posts, replies, likes, reposts,
-follows, notifications, and 1:1 realtime chat (with typing indicators and
-image sharing) are real and shared live between every visitor, not local UI
-state.
+(Firestore + Google/Anonymous Auth + Storage) — posts, replies, likes,
+reposts, follows, notifications, and 1:1 realtime chat (with typing
+indicators and image sharing) are real and shared live between every
+visitor, not local UI state.
 
 **Live**: https://helloworld-viwz.onrender.com
 
 ## How identity works
 
-There's no sign-up. Every visitor gets a stable anonymous Firebase Auth uid
-on first load, and a deterministic "guest" display identity (name, handle,
-color) is derived from that uid — see `guestProfileFromUid` in `src/firebase.js`.
-Same browser, same guest identity across reloads; different visitors look
-different.
+The app is gated behind a login screen: sign in with Google, or continue as
+a guest. A signed-in session has no expiry (Firebase Auth's default
+`browserLocalPersistence`) — closing the tab or restarting the browser
+doesn't log you out; only "Đăng xuất" in Settings does.
+
+- **Guest**: an anonymous Firebase Auth uid, no sign-up. A deterministic
+  "guest" display identity (name, handle, color) is derived from that uid —
+  see `guestProfileFromUid` in `src/firebase.js`. Same browser, same guest
+  identity across reloads; different visitors look different. Nothing is
+  written to Firestore for a guest until they actually post/like/etc.
+- **Google**: on first sign-in there's no profile yet, so the app routes to
+  a one-time setup screen (name + avatar photo, prefilled from the Google
+  account, editable) before entering the app. That profile is persisted to
+  `users/{uid}` in Firestore (name, handle, initials, color, photoURL) and
+  reused on every later sign-in — see `completeProfile` in
+  `src/useCloudData.js`.
 
 ## Firebase setup
 
-1. Firestore Database (Native mode), Authentication → Anonymous sign-in enabled.
+1. Firestore Database (Native mode). Authentication → Sign-in method:
+   enable **Anonymous** and **Google** (Google needs a support email set on
+   the OAuth consent screen the first time you enable it).
 2. Storage → Get started (default bucket is fine — it's already referenced
    in `src/firebase.js`'s `storageBucket`).
 3. Paste `firestore.rules` into Firestore → Rules in the console and publish
    (re-paste after every update — this file also covers `conversations` and
-   `conversations/*/messages` for chat, and `blocks`/`reports` for the post
-   "..." menu).
+   `conversations/*/messages` for chat, `blocks`/`reports` for the post
+   "..." menu, and `users` for real profiles).
+   **Important:** a brand-new Firestore project starts in test mode with a
+   wide-open, time-limited rule — if you haven't pasted this file in yet
+   (or it's been a while), do it now. Until you do, the app runs fine but
+   nothing in the database is actually access-controlled.
 4. Paste `storage.rules` into Storage → Rules and publish (covers chat
-   image uploads under `chat-images/**`).
+   image uploads under `chat-images/**` and avatar uploads under
+   `avatars/{uid}/**`).
 5. Authentication → Settings → Authorized domains: add whatever domain the
-   app is actually served from (Anonymous sign-in fails with
-   `auth/unauthorized-domain` otherwise). `localhost` is included by default.
+   app is actually served from (sign-in fails with `auth/unauthorized-domain`
+   otherwise). `localhost` is included by default.
 6. `node scripts/seed-firestore.mjs` seeds the `posts` collection with demo
    content once, if it's empty — safe to skip or re-run.
 7. Firestore → Indexes: the Inbox screen queries `conversations` with

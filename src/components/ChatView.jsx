@@ -130,7 +130,7 @@ export default function ChatView({ convId, other, currentUser }) {
             const mine = m.senderUid === currentUser.uid
             return (
               <div key={m.id} className={`chat-row${mine ? ' chat-row-mine' : ''}`}>
-                {!mine && <Avatar initials={other.initials} color={other.color} size={28} />}
+                {!mine && <Avatar initials={other.initials} color={other.color} photoURL={other.photoURL} size={28} />}
                 <div className={`chat-bubble${mine ? ' chat-bubble-mine' : ''}`}>
                   {m.imageURL && <img className="chat-bubble-image" src={m.imageURL} alt="" />}
                   {m.text && <span>{m.text}</span>}
@@ -142,7 +142,7 @@ export default function ChatView({ convId, other, currentUser }) {
 
         {isOtherTyping && (
           <div className="chat-row">
-            <Avatar initials={other.initials} color={other.color} size={28} />
+            <Avatar initials={other.initials} color={other.color} photoURL={other.photoURL} size={28} />
             <div className="chat-bubble chat-typing">
               <span className="chat-typing-dot" />
               <span className="chat-typing-dot" />

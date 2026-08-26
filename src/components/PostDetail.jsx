@@ -46,7 +46,7 @@ export default function PostDetail({
     <div className="view">
       {parent && (
         <button className="parent-preview" type="button" onClick={() => onOpenPost(parent)}>
-          <Avatar initials={parent.initials} color={parent.color} size={28} />
+          <Avatar initials={parent.initials} color={parent.color} photoURL={parent.photoURL} size={28} />
           <span className="parent-preview-text">
             Đang trả lời <span className="post-name">{parent.name}</span> · {parent.text}
           </span>
@@ -115,7 +115,7 @@ export default function PostDetail({
           </div>
         )}
         <div className="reply-compose-row">
-          <Avatar initials={currentUser.initials} color={currentUser.color} size={36} />
+          <Avatar initials={currentUser.initials} color={currentUser.color} photoURL={currentUser.photoURL} size={36} />
           <input
             className="reply-input"
             type="text"

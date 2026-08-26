@@ -49,7 +49,7 @@ export default function UserProfileView({
   return (
     <div className="view">
       <div className="profile-header">
-        <Avatar initials={sample.initials} color={sample.color} size={64} />
+        <Avatar initials={sample.initials} color={sample.color} photoURL={sample.photoURL} size={64} />
         <div>
           <p className="post-name profile-name">
             {sample.name}
@@ -91,6 +91,7 @@ export default function UserProfileView({
               handle: sample.handle,
               initials: sample.initials,
               color: sample.color,
+              photoURL: sample.photoURL,
             })
           }
         >

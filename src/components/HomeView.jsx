@@ -21,7 +21,7 @@ export default function HomeView({
   return (
     <div className="view">
       <button className="composer" type="button" onClick={onOpenCompose}>
-        <Avatar initials={currentUser.initials} color={currentUser.color} />
+        <Avatar initials={currentUser.initials} color={currentUser.color} photoURL={currentUser.photoURL} />
         <span className="composer-placeholder">Có gì mới?</span>
         <span className="post-btn post-btn-active">Đăng</span>
       </button>

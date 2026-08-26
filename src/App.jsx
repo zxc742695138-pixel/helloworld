@@ -13,6 +13,8 @@ import InboxView from './components/InboxView'
 import ChatView from './components/ChatView'
 import PostDetail from './components/PostDetail'
 import ComposeModal from './components/ComposeModal'
+import LoginView from './components/LoginView'
+import ProfileSetupView from './components/ProfileSetupView'
 import Toast from './components/Toast'
 import { useCloudData } from './useCloudData'
 import { startConversation } from './chat'
@@ -27,6 +29,8 @@ function getInitialTheme() {
 
 function App() {
   const {
+    authStatus,
+    googleUserInfo,
     ready,
     uid,
     profile,
@@ -45,6 +49,9 @@ function App() {
     addPost,
     markNotifRead,
     markAllRead,
+    signInGoogle,
+    signInGuest,
+    completeProfile,
     logOut,
   } = useCloudData()
 
@@ -64,6 +71,22 @@ function App() {
     const t = setTimeout(() => setToast(''), 2200)
     return () => clearTimeout(t)
   }, [toast])
+
+  if (authStatus === 'loading') {
+    return (
+      <div className="app-shell app-loading">
+        <div className="loading-spinner" aria-label="Đang tải" />
+      </div>
+    )
+  }
+
+  if (authStatus === 'signed-out') {
+    return <LoginView onGoogleSignIn={signInGoogle} onGuestSignIn={signInGuest} />
+  }
+
+  if (authStatus === 'needs-profile') {
+    return <ProfileSetupView uid={uid} googleUserInfo={googleUserInfo} onSubmit={completeProfile} />
+  }
 
   if (!ready) {
     return (
@@ -106,7 +129,14 @@ function App() {
   }
 
   async function openChat(other) {
-    const me = { uid, name: profile.name, handle: profile.handle, initials: profile.initials, color: profile.color }
+    const me = {
+      uid,
+      name: profile.name,
+      handle: profile.handle,
+      initials: profile.initials,
+      color: profile.color,
+      photoURL: profile.photoURL,
+    }
     const convId = await startConversation(me, other)
     pushScreen({ type: 'chat', convId, other })
   }
@@ -125,11 +155,10 @@ function App() {
   }
 
   async function handleLogOut() {
-    if (!window.confirm('Đăng xuất sẽ tạo một danh tính khách mới. Tiếp tục?')) return
+    if (!window.confirm('Đăng xuất khỏi Loop?')) return
     goToFeed()
     setTab('home')
     await logOut()
-    setToast('Đã đăng xuất — bạn đang dùng danh tính khách mới')
   }
 
   async function handleToggleFollow(handle) {
@@ -275,7 +304,14 @@ function App() {
           <ChatView
             convId={screen.convId}
             other={screen.other}
-            currentUser={{ uid, name: profile.name, handle: profile.handle, initials: profile.initials, color: profile.color }}
+            currentUser={{
+              uid,
+              name: profile.name,
+              handle: profile.handle,
+              initials: profile.initials,
+              color: profile.color,
+              photoURL: profile.photoURL,
+            }}
           />
         )}
 

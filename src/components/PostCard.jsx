@@ -39,6 +39,7 @@ export default function PostCard({
     handle,
     initials,
     color,
+    photoURL,
     verified,
     time,
     text,
@@ -73,7 +74,7 @@ export default function PostCard({
         aria-label={`Xem trang cá nhân ${name}`}
         onClick={stop(() => onOpenProfile?.(handle))}
       >
-        <Avatar initials={initials} color={color} />
+        <Avatar initials={initials} color={color} photoURL={photoURL} />
       </button>
 
       <div className="post-body">
@@ -147,7 +148,7 @@ export default function PostCard({
             {replierAvatars?.length > 0 && (
               <span className="replier-stack">
                 {replierAvatars.map((a, i) => (
-                  <Avatar key={i} initials={a.initials} color={a.color} size={16} />
+                  <Avatar key={i} initials={a.initials} color={a.color} photoURL={a.photoURL} size={16} />
                 ))}
               </span>
             )}

@@ -23,8 +23,14 @@ export async function startConversation(me, other) {
     {
       participants: [me.uid, other.uid].sort(),
       participantInfo: {
-        [me.uid]: { name: me.name, handle: me.handle, initials: me.initials, color: me.color },
-        [other.uid]: { name: other.name, handle: other.handle, initials: other.initials, color: other.color },
+        [me.uid]: { name: me.name, handle: me.handle, initials: me.initials, color: me.color, photoURL: me.photoURL || null },
+        [other.uid]: {
+          name: other.name,
+          handle: other.handle,
+          initials: other.initials,
+          color: other.color,
+          photoURL: other.photoURL || null,
+        },
       },
       updatedAt: serverTimestamp(),
     },
